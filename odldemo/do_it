@@ -11,3 +11,7 @@ mkdir /vagrant
 tar zxfv odldemo-puppet.tgz -C /vagrant
 puppet apply --hiera_config /vagrant/puppet/hiera.yaml /vagrant/puppet/manifests/base.pp
 puppet apply --hiera_config /vagrant/puppet/hiera.yaml /vagrant/puppet/manifests/devstack-control.pp
+sed -e "/^PasswordAuthentication/ s/no/yes/" -i /etc/ssh/sshd_config
+service ssh restart
+ssh vagrant@localhost
+
