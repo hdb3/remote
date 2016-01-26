@@ -13,14 +13,18 @@ The work can be done by building on the external network configuration, without 
 
 Implementation
 
-> sudo ovs-vsctl del-port br-ex eth2
-> sudo ip addr add 172.16.1.1 dev br-ex
-> sudo ip link set dev br-ex up
-> sudo route add -net 172.16.1.0/24 gw 172.16.1.1
-> sudo crudini --set --verbose /etc/sysctl.conf "" net.ipv4.ip_forward 1
-> sudo sysctl -p
+> ovs-vsctl del-port br-ex eth2
+> ip addr add 172.16.1.1 dev br-ex
+> ip link set dev br-ex up
+> route add -net 172.16.1.0/24 gw 172.16.1.1
+> crudini --set --verbose /etc/sysctl.conf "" net.ipv4.ip_forward 1
+> sysctl -p
+> iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 Explanation
 
 In the external network configuration the path to all other networks is via the 'physical interface' connected to br-ex - the gateway IP is imply arped for (gw IP is part of the external subnet configuration).
 We remove the physical interface from br-ex, add an IP (need not be the g/w, but if it is then we also get onward connectivity for free!), and add a route to the internal network.
+
+Configuration Requirements
+The configuration of IP addresses is matched with the configuration of 'external.sh'.  There is no dependency at all on the external environment of the hypervisor
