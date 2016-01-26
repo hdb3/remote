@@ -22,11 +22,16 @@ if [ -f $wd/user ]; then
   user="$user@"
 fi
 
+function sshclean {
+    echo "sshclean $1"
+    ssh-keygen -q -f "~/.ssh/known_hosts" -R `dig +short $1`
+    ssh-keygen -q -f "~/.ssh/known_hosts" -R $1
+}
+
 for node in "$@"
 do
     echo "$node (${user}${node})"
-    ssh-keygen -q -f "/home/nic/.ssh/known_hosts" -R `dig +short $node`
-    ssh-keygen -q -f "/home/nic/.ssh/known_hosts" -R $node
+    sshclean $node || echo "sshclean?"
     scp $wd/* ${user}${node}:
     ssh -t ${user}${node} sudo bash -ve do_it
 done
