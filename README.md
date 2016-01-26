@@ -7,6 +7,9 @@ where *dir* is an existing sub-directory containing at least the text file 'do_i
 
 The scripts role.py and subnet.py, and the 'roles' configuration file, if they exist in the sub-directory, may support role specific host configuration, driven by assigned IP addresses.
 
+## notes on sample scriptdirs
+please look in subsidiary directories for further more specific README files!
+
 ## user name for ssh to targets
 The config directory may contain a file 'user': if it does then the contents of that file should be a string which is a valid user name for ssh access.
 
