@@ -1,0 +1,30 @@
+
+Build a virtualised network which allows connectivity between the hypervisor host and nested VMs.
+This topology is only applicable for scenrios such as an all-in-one node where there is no need to transit networks to reach the hypervisor hosting the target VM.
+
+( A corresponding multi-node configuration requires a topology in which the controller or agent VM is attached to the 'external' network. )
+
+This scenario attaches floating IPs to nested VMs, and builds an additional, 'external', network and virtual router.  An alternative approach would be to build a single external network and directly attach the nested VMs.
+Both approaches should 'just work'.
+
+In this case, we proceed as for a full external network, however, the external OVS bridge does not need a 'real' physical pass-through port; instead, we can associate an IP address to the bridge port and talk directly.  To simplify matters, disconnect the physical port....
+
+The work can be done by building on the external network configuration, without touching either openstack network objects or the openstack config:
+
+Implementation
+
+> ovs-vsctl del-port br-ex eth2
+> ip addr add 172.16.1.1 dev br-ex
+> ip link set dev br-ex up
+> route add -net 172.16.1.0/24 gw 172.16.1.1
+> crudini --set --verbose /etc/sysctl.conf "" net.ipv4.ip_forward 1
+> sysctl -p
+> iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+Explanation
+
+In the external network configuration the path to all other networks is via the 'physical interface' connected to br-ex - the gateway IP is imply arped for (gw IP is part of the external subnet configuration).
+We remove the physical interface from br-ex, add an IP (need not be the g/w, but if it is then we also get onward connectivity for free!), and add a route to the internal network.
+
+Configuration Requirements
+The configuration of IP addresses is matched with the configuration of 'external.sh'.  There is no dependency at all on the external environment of the hypervisor
