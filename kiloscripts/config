@@ -12,3 +12,4 @@ INSTALL_HORIZON=TRUE
 # hopefully temporarily!
 # comment out if you don't want ODL networking
 # ODL_IP=192.168.50.20
+CALICO=TRUE

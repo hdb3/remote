@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+set -a # this ensures the variables set in the next step are exported to subsequent commands...
+source config
+$(./role.py)
+if [[ $OPENSTACK_INSTALL == "yes" ]] ; then
+  echo "Local configuration detected and valid role found"
+  echo "Will now commence installation"
+else
+  echo -e "\e[31mNo local configuration detected or no valid role found"
+  echo -e "Will abort installation\e[0m"
+  exit
+fi
+if [ -n "$ODL_IP" ]; then bash -ev odl.sh ; elif
+   [ -n "$CALICO" ]; then bash -ev calico ; fi
