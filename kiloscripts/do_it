@@ -37,7 +37,8 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
 fi
 sudo -E bash -ev nova.sh
 sudo -E bash -ev neutron.sh
-if [ -n "$ODL_IP" ]; then bash -ev odl.sh ; fi
+if [ -n "$ODL_IP" ]; then bash -ev odl.sh ; elif
+   [ -n "$CALICO" ]; then bash -ev calico ; fi
 }
 rmdir /tmp/install_lock
 echo "all complete... :-)"
