@@ -12,4 +12,4 @@ else
   exit
 fi
 if [ -n "$ODL_IP" ]; then bash -ev odl.sh ; elif
-   [ -n "$CALICO" ]; then bash -ev calico ; fi
+   [ -n "$CALICO" ]; then sudo -E bash -ev calico.sh ; fi

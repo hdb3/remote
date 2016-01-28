@@ -38,7 +38,7 @@ fi
 sudo -E bash -ev nova.sh
 sudo -E bash -ev neutron.sh
 if [ -n "$ODL_IP" ]; then bash -ev odl.sh ; elif
-   [ -n "$CALICO" ]; then bash -ev calico ; fi
+   [ -n "$CALICO" ]; then sudo -E bash -ev calico.sh ; fi
 }
 rmdir /tmp/install_lock
 echo "all complete... :-)"

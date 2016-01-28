@@ -1,4 +1,6 @@
-cat > /etc/yum.repos.d/calico.repo <<EOF0
+pip install --upgrade pip
+pip install --upgrade etcd urllib3 six
+cat > /etc/yum.repos.d/calico.repo << EOF0
 [calico]
 name=Calico Repository
 baseurl=http://binaries.projectcalico.org/rpm_kilo/
@@ -40,7 +42,7 @@ crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers 
 crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types local
 crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers calico
 crudini --set --verbose  /etc/neutron/neutron.conf DEFAULT dhcp_agents_per_network 5
-yum install calico-control
+yum install -y calico-control
 systemctl restart neutron-server openstack-nova-api
 else
 cat << EOF3 > /etc/sysconfig/etcd
@@ -87,7 +89,7 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
 #
 #neutron agent-delete <agent-id>
 else
-yum install openstack-neutron
+yum install -y openstack-neutron
 crudini --replace --verbose /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.RoutedInterfaceDriver
 # Liberty...
 # crudini --set /etc/neutron/dhcp_agent.ini dhcp_driver networking_calico.agent.linux.dhcp.DnsmasqRouted
@@ -95,7 +97,7 @@ crudini --replace --verbose /etc/neutron/dhcp_agent.ini DEFAULT interface_driver
 # crudini --set /etc/neutron/dhcp_agent.ini use_namespaces False
 systemctl restart neutron-dhcp-agent 
 systemctl enable neutron-dhcp-agent 
-yum install openstack-nova-api
+yum install -y openstack-nova-api
 systemctl restart openstack-nova-metadata-api
 systemctl enable openstack-nova-metadata-api
 yum install -y bird bird6 calico-compute
