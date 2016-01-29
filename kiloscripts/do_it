@@ -1,11 +1,14 @@
 #!/bin/bash
 {
-set -e
-mkdir /tmp/install_lock
+echo "centos:centos" | sudo chpasswd
+set +e
+mkdir -p /tmp/install_lock
 ip route show | grep default > defroute
-sudo dhclient eth1 || echo "ignore interfaces which don't exist.."
-sudo dhclient -x eth2 || echo "ignore interfaces which don't exist.."
+sudo dhclient eth1
+sudo ip link set dev eth2 up
+sudo dhclient -x eth2
 sudo ip route change $(cat defroute)
+set -e
  # need to know how many interfaces are really needed - aimed at virtualised hosts really...
 # this is so that subsequent subnet probes find assigned IP addresses
 sudo yum -q  -y install epel-release deltarpm

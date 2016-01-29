@@ -16,7 +16,9 @@ curl -L  https://github.com/coreos/etcd/releases/download/v2.0.11/etcd-v2.0.11-l
 tar xvf etcd-v2.0.11-linux-amd64.tar.gz
 cd etcd-v2.0.11-linux-amd64
 mv etcd* /usr/local/bin/
+set +e
 adduser -s /sbin/nologin -d /var/lib/etcd/ etcd
+set +e
 chmod 700 /var/lib/etcd/
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
@@ -51,14 +53,14 @@ ETCD_DATA_DIR=/var/lib/etcd
 ETCD_INITIAL_CLUSTER="ETCDMASTER=http://$CONTROLLER_IP:2380"
 EOF3
 crudini --set --verbose /etc/libvirt/qemu.conf "" clear_emulator_capabilities 0
-crudini --set --verbose /etc/libvirt/qemu.conf "" user root
-crudini --set --verbose /etc/libvirt/qemu.conf "" group root
-crudini --set --verbose /etc/libvirt/qemu.conf "" cgroup_device_acl = '[ "/dev/null", "/dev/full", "/dev/zero", "/dev/random", "/dev/urandom", "/dev/ptmx", "/dev/kvm", "/dev/kqemu", "/dev/rtc", "/dev/hpet", "/dev/net/tun", ]'
+crudini --set --verbose /etc/libvirt/qemu.conf "" user "root"
+crudini --set --verbose /etc/libvirt/qemu.conf "" group "root"
+crudini --set --verbose /etc/libvirt/qemu.conf "" cgroup_device_acl '[ "/dev/null", "/dev/full", "/dev/zero", "/dev/random", "/dev/urandom", "/dev/ptmx", "/dev/kvm", "/dev/kqemu", "/dev/rtc", "/dev/hpet", "/dev/net/tun", ]'
 service libvirtd restart
-crudini --delete --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver
-crudini --delete --verbose /etc/nova/nova.conf neutron service_neutron_metadata_proxy
-crudini --delete --verbose /etc/nova/nova.conf neutron service_metadata_proxy
-crudini --delete --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret
+crudini --del --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver
+crudini --del --verbose /etc/nova/nova.conf neutron service_neutron_metadata_proxy
+crudini --del --verbose /etc/nova/nova.conf neutron service_metadata_proxy
+crudini --del --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret
 systemctl restart openstack-nova-compute
 systemctl stop neutron-openvswitch-agent openvswitch
 systemctl disable neutron-openvswitch-agent openvswitch
@@ -88,9 +90,10 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
 #For each agent, delete them with the following command on your control node, replacing <agent-id> with the ID of the agent:
 #
 #neutron agent-delete <agent-id>
+for id in $(neutron agent-list | awk "/neutron-/ {print \$2}") ; do echo $id ; neutron agent-delete $id ; done
 else
 yum install -y openstack-neutron
-crudini --replace --verbose /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.RoutedInterfaceDriver
+crudini --set --verbose /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.RoutedInterfaceDriver
 # Liberty...
 # crudini --set /etc/neutron/dhcp_agent.ini dhcp_driver networking_calico.agent.linux.dhcp.DnsmasqRouted
 # crudini --set /etc/neutron/dhcp_agent.ini interface_driver networking_calico.agent.linux.interface.RoutedInterfaceDriver
