@@ -1,17 +1,3 @@
-pip install --upgrade pip
-pip install --upgrade etcd urllib3 six
-cat > /etc/yum.repos.d/calico.repo << EOF0
-[calico]
-name=Calico Repository
-baseurl=http://binaries.projectcalico.org/rpm_kilo/
-enabled=1
-skip_if_unavailable=0
-gpgcheck=1
-gpgkey=http://binaries.projectcalico.org/rpm/key
-priority=97
-EOF0
-yum update -y
-
 curl -L  https://github.com/coreos/etcd/releases/download/v2.0.11/etcd-v2.0.11-linux-amd64.tar.gz -o etcd-v2.0.11-linux-amd64.tar.gz
 tar xvf etcd-v2.0.11-linux-amd64.tar.gz
 cd etcd-v2.0.11-linux-amd64
@@ -53,8 +39,8 @@ ETCD_DATA_DIR=/var/lib/etcd
 ETCD_INITIAL_CLUSTER="ETCDMASTER=http://$CONTROLLER_IP:2380"
 EOF3
 crudini --set --verbose /etc/libvirt/qemu.conf "" clear_emulator_capabilities 0
-crudini --set --verbose /etc/libvirt/qemu.conf "" user "root"
-crudini --set --verbose /etc/libvirt/qemu.conf "" group "root"
+crudini --set --verbose /etc/libvirt/qemu.conf "" user '"root"'
+crudini --set --verbose /etc/libvirt/qemu.conf "" group '"root"'
 crudini --set --verbose /etc/libvirt/qemu.conf "" cgroup_device_acl '[ "/dev/null", "/dev/full", "/dev/zero", "/dev/random", "/dev/urandom", "/dev/ptmx", "/dev/kvm", "/dev/kqemu", "/dev/rtc", "/dev/hpet", "/dev/net/tun", ]'
 service libvirtd restart
 crudini --del --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver
