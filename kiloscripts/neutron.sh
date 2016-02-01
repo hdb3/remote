@@ -90,9 +90,11 @@ fi
 # the following needed if external networks are needed on compute nodes (and probably also for distributed virtual routers)
 if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   systemctl restart openvswitch
+  set +e
   ip link set dev $EXTERNAL_PORT up
   ovs-vsctl --may-exist add-br br-ex
   ovs-vsctl --may-exist add-port br-ex $EXTERNAL_PORT
+  set -e
   crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini ovs bridge_mappings external:br-ex
    #NETWORK_SERVICES="openvswitch neutron-openvswitch-agent neutron-dhcp-agent neutron-l3-agent neutron-metadata-agent"
   systemctl enable $NETWORK_SERVICES neutron-ovs-cleanup ; systemctl restart $NETWORK_SERVICES
