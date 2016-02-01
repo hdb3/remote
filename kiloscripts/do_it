@@ -26,6 +26,7 @@ else
   echo -e "Will abort installation\e[0m"
   exit
 fi
+if [ -n "$CALICO" ]; then sudo -E bash -ev calico-package.sh ; fi
 sudo -E bash -ev package.sh
 source services
 sudo systemctl stop $NETWORK_SERVICES $COMPUTE_SERVICES $CONTROLLER_SERVICES
