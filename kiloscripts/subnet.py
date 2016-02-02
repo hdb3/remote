@@ -43,7 +43,7 @@ def main():
         red("please give me something to work on....?")
         exit(1)
     else:
-        net = ipaddress.ip_network(argv[1])
+        net = ipaddress.ip_network(unicode(argv[1]))
         binaddr = unpack("!I",net.network_address.packed)[0]
         if net.prefixlen == 32:
             net = ipaddress.ip_network("%s/%s" % (net.network_address,32 - get_trailing_zero_bit_count(binaddr)))
@@ -55,7 +55,7 @@ def main():
 
     addrs = getaddrs()
     for (iface,addr) in addrs:
-        if ipaddress.ip_address(addr) in net:
+        if ipaddress.ip_address(unicode(addr)) in net:
            green("I found a matching interface for this subnet! (%s,%s,%s)" % (addr,iface,net.exploded))
            print "%s" % addr
            exit(0)
