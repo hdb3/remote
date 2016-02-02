@@ -71,13 +71,13 @@ if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   if [[ $TUNNEL_IP == "ERROR" ]] ; then TUNNEL_IP=$MY_IP ; fi
   crudini --set --verbose  /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
   crudini --set --verbose  /etc/neutron/l3_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
-  # crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini ovs local_ip $(./subnet.py $TUNNEL_SUBNET)
-  crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini ovs local_ip $TUNNEL_IP
-  crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini securitygroup enable_security_group True
-  crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini securitygroup enable_ipset True
-  crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
-  # crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
-  crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini agent tunnel_types gre
+  # crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $(./subnet.py $TUNNEL_SUBNET)
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $TUNNEL_IP
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_security_group True
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_ipset True
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
+  # crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini agent tunnel_types gre
   echo 'net.ipv4.conf.all.rp_filter=0' >> /etc/sysctl.conf
   echo 'net.ipv4.conf.default.rp_filter=0' >> /etc/sysctl.conf
   # echo 'net.bridge.bridge-nf-call-iptables=1' >> /etc/sysctl.conf
@@ -95,7 +95,7 @@ if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   ovs-vsctl --may-exist add-br br-ex
   ovs-vsctl --may-exist add-port br-ex $EXTERNAL_PORT
   set -e
-  crudini --set --verbose  /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini ovs bridge_mappings external:br-ex
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings external:br-ex
    #NETWORK_SERVICES="openvswitch neutron-openvswitch-agent neutron-dhcp-agent neutron-l3-agent neutron-metadata-agent"
   systemctl enable $NETWORK_SERVICES neutron-ovs-cleanup ; systemctl restart $NETWORK_SERVICES
 fi
