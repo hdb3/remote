@@ -1,9 +1,3 @@
-#192.168.0.20 controller
-#192.168.0.20 network
-#192.168.0.102 compute
-#148.88.225.118 controller
-#148.88.225.118 network
-#148.88.225.118 compute
-192.168.0.101 controller
-192.168.0.101 network
-192.168.0.101 compute
+10.30.65.205 controller
+10.30.65.205 network
+10.30.65.205 compute
