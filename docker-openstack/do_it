@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+sudo rpm -i http://dell0/openvswitch/RPMS/2.4.0/openvswitch-2.4.0-1.el7.centos.x86_64.rpm
+sudo yum -y install wget screen lvm2
+wget -qO- https://get.docker.com/ | sh
+sudo usermod -aG docker centos
+sudo umount /dev/vdb
+sudo pvcreate -f /dev/vdb
+sudo vgcreate vg-docker /dev/vdb
+sudo lvcreate -L 90G -n data vg-docker
+sudo lvcreate -L 4G -n metadata vg-docker
+export STORAGEOPTS="--storage-driver=devicemapper --storage-opt dm.basesize=50G --storage-opt dm.datadev=/dev/vg-docker/data --storage-opt dm.metadatadev=/dev/vg-docker/metadata"
+# export STORAGEOPTS="--storage-opt dm.thinpooldev=/dev/vdb --storage-opt dm.basesize=100G"
+# export STORAGEOPTS="overlay"
+sudo sed -i -e "/^ExecStart/ s;daemon;daemon $STORAGEOPTS;" /usr/lib/systemd/system/docker.service
+sudo systemctl enable docker openvswitch
+sudo systemctl start docker openvswitch
+sudo modprobe ip_tables
+sudo modprobe ip6_tables
+sudo docker run --privileged -d -v /sys/fs/cgroup:/sys/fs/cgroup:ro -p 80:80 -p 2222:2222 hdb3/systemd-openstack-base
