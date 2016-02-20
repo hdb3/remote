@@ -7,7 +7,8 @@ crudini --set --verbose /etc/keystone/keystone.conf token driver memcache
 crudini --set --verbose /etc/keystone/keystone.conf revoke driver sql
 su -s /bin/sh -c "keystone-manage db_sync" keystone
 
-sed -i.bak -e "/^ServerRoot/a ServerName $CONTROLLER_IP" /etc/httpd/conf/httpd.conf
+sed -i -e "/^ServerRoot/a ServerName $CONTROLLER_IP" /etc/httpd/conf/httpd.conf
+# sed -i.bak -e "/^ServerRoot/a ServerName $CONTROLLER_IP" /etc/httpd/conf/httpd.conf
 
 cp  wsgi-keystone.conf /etc/httpd/conf.d/wsgi-keystone.conf
 
