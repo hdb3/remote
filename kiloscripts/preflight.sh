@@ -5,8 +5,10 @@ systemctl restart ntpd
 systemctl stop firewalld || :
 systemctl disable firewalld || :
 
-sed -i 's/enforcing/disabled/g' /etc/selinux/config
-echo 0 > /sys/fs/selinux/enforce || echo "not needed"
+if [ -f /etc/selinux/config ]; then
+  sed -i 's/enforcing/disabled/g' /etc/selinux/config
+  echo 0 > /sys/fs/selinux/enforce
+fi
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"

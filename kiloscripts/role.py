@@ -10,8 +10,8 @@ from collections import defaultdict,OrderedDict
 def getifaces():
     ifaces = [] # list of (<interface name>,<IPv4 address>)
     for iface in netifaces.interfaces():
-        if iface == "lo":
-            continue
+        # if iface == "lo":
+            # continue
         ifaddresses = netifaces.ifaddresses(iface)
         if netifaces.AF_INET in ifaddresses:
             ifaces.append((iface,ifaddresses[netifaces.AF_INET][0]['addr']))
