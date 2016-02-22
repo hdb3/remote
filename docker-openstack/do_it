@@ -5,12 +5,13 @@ sudo yum -y install wget screen lvm2
 wget -qO- https://get.docker.com/ | sh
 sudo usermod -aG docker centos
 sudo umount /dev/vdb
-sudo pvcreate -f /dev/vdb
-sudo vgcreate vg-docker /dev/vdb
-sudo lvcreate -L 90G -n data vg-docker
-sudo lvcreate -L 4G -n metadata vg-docker
-export STORAGEOPTS="--storage-driver=devicemapper --storage-opt dm.basesize=50G --storage-opt dm.datadev=/dev/vg-docker/data --storage-opt dm.metadatadev=/dev/vg-docker/metadata"
-# export STORAGEOPTS="--storage-opt dm.thinpooldev=/dev/vdb --storage-opt dm.basesize=100G"
+sudo pvcreate -ff /dev/vdb
+sudo vgcreate vgdocker /dev/vdb
+sudo lvcreate --thinpool pool -l 100%FREE vgdocker
+export STORAGEOPTS="--storage-opt dm.thinpooldev=/dev/mapper/vgdocker-pool --storage-opt dm.basesize=100G"
+#sudo lvcreate -L 90G -n data vg-docker
+#sudo lvcreate -L 4G -n metadata vg-docker
+# export STORAGEOPTS="--storage-driver=devicemapper --storage-opt dm.basesize=50G --storage-opt dm.datadev=/dev/vg-docker/data --storage-opt dm.metadatadev=/dev/vg-docker/metadata"
 # export STORAGEOPTS="overlay"
 sudo sed -i -e "/^ExecStart/ s;daemon;daemon $STORAGEOPTS;" /usr/lib/systemd/system/docker.service
 sudo systemctl enable docker openvswitch
