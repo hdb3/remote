@@ -1,0 +1,1 @@
+boot the VM thus: nova boot --flavor m.docker --image Centos7 --key-name openstack_rsa --nic net-id=`neutron net-list| awk '/ routed-net / {print $2}'` --poll openstack12
