@@ -1,8 +1,6 @@
-# liberty
+# openstack
 
 build various openstack cluster topologies, from 'all-in-one' single node to separate control/network/compute nodes with multiple instances of any role
-
-this scriptset is a copy of kiloscripts, modified for liberty release...
 
 In addition to the scripts invoked at build time, there are additional scripts which can be used to manage nested VMs once openstack is running:
 
