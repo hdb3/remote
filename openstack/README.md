@@ -42,6 +42,11 @@ Other variable names are hopefully mostly self-explanatory, but see later for a 
 >neutron router-interface-add $ROUTERNAME $VNETNAME
 >neutron router-gateway-set $ROUTERNAME $EXTERNALNETNAME
 
+## Script - bind a floating IP for a VM host
+>IP=$(nova list | awk "/$VMNAME/ {sub(\"$VNETNAME=\",\"\",\$12); sub(\",\",\"\",\$12); print \$12}")
+>PORT=$(neutron port-list | awk " /$IP/ {print \$2}")
+>neutron floatingip-create --port-id $PORT $EXTERNALNETNAME
+
 # Routed non-NAT operation
 
 Routed non-NAT operation requires internal and external network definitions largely identical to that required for the NATed 'floating IP' model.  The phases and operations are as defined for Floating-IP / NAT operation, the difference is that the IP subnet used to creatre the virtual network should correspond to the externally routable address range, and the configuration for the connection between external and internal networks specifies a non-NAT mode, and requires explicit assignment of the externally reachable gateway address, which must lie in the subnet associated with the external network.
