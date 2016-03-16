@@ -21,7 +21,7 @@ The script includes support for boooting a VM into the virtual environment.
 >export VIRTNET="172.16.42.0/24" IMAGE=cirros-0.3.3-x86_64 FLAVOR=m1.small VNETNAME=net-virt VSUBNETNAME=subnet-virt VMNAME=vm1
 >neutron net-create $NETNAME
 >neutron subnet-create --name $VSUBNETNAME $VNETNAME $VIRTNET
->nova boot --flavor $FLAVOR  --image $IMAGE net-id=`neutron net-list| awk "/ $VNETNAME / {print $2}"` --poll $VMNAME
+>nova boot --flavor $FLAVOR  --image $IMAGE --nic net-id=`neutron net-list| awk "/ $VNETNAME / {print $2}"` --poll $VMNAME
 
 # Floating-IP / NAT operation
 This mode is the default reccomendation for connecting external clients to virtualised services, i.e. enabling inbound connections for TCP or UDP or even just ICMP.
@@ -32,18 +32,18 @@ Other variable names are hopefully mostly self-explanatory, but see later for a 
 ## Script - define the external network
 >export PHYSICALNETNAME="external" DNS="10.30.65.200" EXTERNALGW="172.16.1.1" EXTERNALNETWORK="172.16.1.0/24" \
 > EXTERNALNETNAME="net-external" EXTERNALSUBNETNAME="subnet-external" \
-> EXTERNALADDRSTART="172.16.1.128" EXTERNALADDREND="172.16.1.254"
+> EXTERNALIPSTART="172.16.1.128" EXTERNALIPEND="172.16.1.254"
 >neutron net-create $EXTERNALNETNAME --router:external --provider:physical_network $PHYSICALNETNAME --provider:network_type flat
->neutron subnet-create --name $EXTERNALSUBNETNAME --dns-nameserver $DNS --enable-dhcp --gateway $EXTERNALGW --allocation-pool start=EXTERNALIPSTART,end=EXTERNALIPEND $EXTERNALNETNAME $EXTERNALNETWORK
+>neutron subnet-create --name $EXTERNALSUBNETNAME --dns-nameserver $DNS --enable-dhcp --gateway $EXTERNALGW --allocation-pool start=$EXTERNALIPSTART,end=$EXTERNALIPEND $EXTERNALNETNAME $EXTERNALNETWORK
 
 ## Script - interconnect the internal and external networks (NAT mode)
 >export ROUTERNAME="r1"
 >neutron router-create $ROUTERNAME
->neutron router-interface-add $ROUTERNAME $VNETNAME
+>neutron router-interface-add $ROUTERNAME $VSUBNETNAME
 >neutron router-gateway-set $ROUTERNAME $EXTERNALNETNAME
 
 ## Script - bind a floating IP for a VM host
->IP=$(nova list | awk "/$VMNAME/ {sub(\"$VNETNAME=\",\"\",\$12); sub(\",\",\"\",\$12); print \$12}")
+>IP=$(nova list | awk "/$VMNAME/ {sub(\".*=\",\"\",\$12); sub(\",\",\"\",\$12); print \$12}")
 >PORT=$(neutron port-list | awk " /$IP/ {print \$2}")
 >neutron floatingip-create --port-id $PORT $EXTERNALNETNAME
 
@@ -57,7 +57,7 @@ Only the line "neutron router-gateway-set" changes.
 
 >export ROUTERNAME="r1" EXTERNALNEXTHOP="172.16.1.150"
 >neutron router-create $ROUTERNAME
->neutron router-interface-add $ROUTERNAME $VNETNAME
+>neutron router-interface-add $ROUTERNAME $VSUBNETNAME
 >neutron router-gateway-set --disable-snat --fixed-ip ip_address=$EXTERNALNEXTHOP $ROUTERNAME $EXTERNALNETNAME
 
 # Direct external network configuration
