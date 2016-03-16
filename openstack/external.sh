@@ -8,7 +8,7 @@ neutron router-gateway-set ext-net ext-net
 
 for VM in testvm1 testvm2
   do echo $VM
-  IP=$(nova list | awk "/$VM/ {sub(\"testnet=\",\"\",\$12); sub(\",\",\"\",\$12); print \$12}")
+  IP=$(nova list | awk "/$VM/ {sub(\".*=\",\"\",\$12); sub(\",\",\"\",\$12); print \$12}")
   PORT=$(neutron port-list | awk " /$IP/ {print \$2}")
   neutron floatingip-create --port-id $PORT ext-net
 done
