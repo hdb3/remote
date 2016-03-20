@@ -49,6 +49,8 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
   ln -fs /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugin.ini
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan,gre,vxlan
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types gre
+  crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks external
+  crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vlan network_vlan_ranges vlan
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_gre tunnel_id_ranges 1:1000
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_security_group True
@@ -91,11 +93,18 @@ fi
 if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   systemctl restart openvswitch
   set +e
-  ip link set dev $EXTERNAL_PORT up
-  ovs-vsctl --may-exist add-br br-ex
-  ovs-vsctl --may-exist add-port br-ex $EXTERNAL_PORT
+  if [ -n "$EXTERNAL_PORT" ] ; then
+    ip link set dev $EXTERNAL_PORT up
+    ovs-vsctl --may-exist add-br br-ex
+    ovs-vsctl --may-exist add-port br-ex $EXTERNAL_PORT
+  fi
+  if [ -n "$VLAN_PORT" ] ; then
+    ip link set dev $VLAN_PORT up
+    ovs-vsctl --may-exist add-br br-vlan
+    ovs-vsctl add-port br-vlan $VLAN_PORT -- set port $VLAN_PORT vlan_mode=trunk
+  fi
   set -e
-  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings external:br-ex
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings external:br-ex,vlan:br-vlan
    #NETWORK_SERVICES="openvswitch neutron-openvswitch-agent neutron-dhcp-agent neutron-l3-agent neutron-metadata-agent"
   systemctl enable $NETWORK_SERVICES neutron-ovs-cleanup ; systemctl restart $NETWORK_SERVICES
 fi
