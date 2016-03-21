@@ -9,7 +9,7 @@ ROUTEDNETNAME=routednet ROUTEDSUBNETNAME=routedsubnet ROUTEDROUTER=r2 ROUTEDNETW
 # NATed metwork
 neutron net-create $VNETNAME
 neutron subnet-create --name $VSUBNETNAME $VNETNAME $INTERNALNETWORK
-nova boot --flavor m1.small --image cirros-0.3.3-x86_64 --nic net-id=$(neutron net-list| awk "/ $VNETNAME / {print \$2}") --poll $VMNAME
+openstack server create --flavor m1.small --image cirros-0.3.3-x86_64 --nic net-id=$(neutron net-list| awk "/ $VNETNAME / {print \$2}") --poll $VMNAME
 neutron net-create $EXTERNALNETNAME --router:external --provider:physical_network $PHYSICALNETWORK --provider:network_type flat
 neutron subnet-create --name $EXTERNALSUBNETNAME --dns-nameserver $DNS --enable-dhcp --gateway $EXTERNALGW --allocation-pool start=$EXTERNALSTART,end=$EXTERNALEND $EXTERNALNETNAME $EXTERNALNETWORK
 neutron router-create $ROUTER
@@ -26,11 +26,11 @@ neutron router-create $ROUTEDROUTER
 neutron router-interface-add $ROUTEDROUTER $ROUTEDSUBNETNAME
 neutron router-gateway-set --disable-snat --fixed-ip ip_address=$ROUTEDEXTERNALGW $ROUTEDROUTER $EXTERNALNETNAME
 export NETID=`neutron net-list| awk '/ routed-net / {print $2}'`
-nova boot --flavor m1.small --image cirros-0.3.3-x86_64 --nic net-id=$(neutron net-list| awk "/ $ROUTEDNETNAME / {print \$2}") --poll $ROUTEDVM
+openstack server create --flavor m1.small --image cirros-0.3.3-x86_64 --nic net-id=$(neutron net-list| awk "/ $ROUTEDNETNAME / {print \$2}") --poll $ROUTEDVM
 
 exit
 
-nova delete $ROUTEDVM $VMNAME
+openstack server delete $ROUTEDVM $VMNAME
 
 # routed network
 neutron router-gateway-clear $ROUTEDROUTER
