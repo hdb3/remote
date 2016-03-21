@@ -3,7 +3,7 @@
 systemctl enable ntpd
 systemctl restart ntpd
 systemctl stop firewalld || :
-systemctl disable firewalld || :
+systemctl --now disable firewalld NetworkManager || :
 
 if [ -f /etc/selinux/config ]; then
   sed -i 's/enforcing/disabled/g' /etc/selinux/config
