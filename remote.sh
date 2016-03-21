@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ev
 
 USAGE="Usage: $0 dir host1 host2 ... hostN"
 
@@ -32,12 +32,12 @@ for node in "$@"
 do
     echo "$node (${user}${node})"
 
-    if [ -f $wd/password ]; then
-      which sshpass || ( echo "please install sshpass" ; exit )
-      sshpass -p `cat $wd/password` ssh-copy-id ${user}${node}
-    fi
+    # if [ -f $wd/password ]; then
+      # which sshpass || ( echo "please install sshpass" ; exit )
+      # sshpass -p `cat $wd/password` ssh-copy-id ${user}${node}
+    # fi
 
-    sshclean $node || echo "sshclean?"
+    # sshclean $node || echo "sshclean?"
     echo "scp $wd/* ${user}${node}:"
     scp $wd/* ${user}${node}:
     ssh -t ${user}${node} sudo bash -ve do_it
