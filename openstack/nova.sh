@@ -41,7 +41,7 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf neutron admin_username neutron
   crudini --set --verbose /etc/nova/nova.conf neutron admin_password $SERVICE_PWD
   crudini --set --verbose /etc/nova/nova.conf neutron service_metadata_proxy True
-  crudini --set --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret meta123
+  crudini --set --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret $META_PWD
 fi
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
