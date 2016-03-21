@@ -5,7 +5,7 @@ sudo sed -i -e '/^PasswordAuthentication/ s/no/yes/' /etc/ssh/sshd_config
 sudo systemctl restart sshd
 sed -i -e '/requiretty/ d' /etc/sudoers
 sudo yum -y install epel-release
-sudo yum -y install ntp yum-plugin-priorities
+sudo yum -y install ntp yum-plugin-priorities redhat-lsb-core
 # sudo systemctl disable firewalld ; sudo systemctl stop firewalld
 sudo systemctl enable ntpd
 sudo systemctl start ntpd
