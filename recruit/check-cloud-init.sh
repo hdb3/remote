@@ -88,6 +88,18 @@ attempt_all_logins() {
   fi
 }
 
+attempt_ssh_copy_id() {
+   if ${PRECMD} ssh-copy-id ${SSHOPTIONS} ${SSHTARGET}
+    then
+      echo "ssh-copy-id - sucess!"
+      rval=0
+     else
+      echo "ssh-copy-id : something went wrong!"
+      rval=1
+   fi
+   return $rval
+}
+
 attempt_scp() {
    tmpfile=$(mktemp /tmp/XXXXXX)
    dd if=/dev/urandom of=$tmpfile count=1
@@ -103,8 +115,8 @@ attempt_scp() {
       echo "scp test: something went wrong!"
       rval=1
    fi
-   # rm "$tmpfile"
-   # rm -f "${tmpfile}.copy"
+   rm "$tmpfile"
+   rm -f "${tmpfile}.copy"
    return $rval
 }
 #############################################################
@@ -135,6 +147,7 @@ if attempt_all_logins
     echo "the required ssh options are: ${SSHOPTIONS}"
     echo "the required ssh target is: ${SSHTARGET}"
     attempt_scp
+    attempt_ssh_copy_id
   else
     echo "all logins failed"
 fi
