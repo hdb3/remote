@@ -1,9 +1,5 @@
 #!/bin/bash
 
-    defaultkey="/home/nic/.ssh/openstack_rsa"
-    host="$1"
-
-
 attempt_login() {
 
 # assumes that $host and $user is already set
@@ -16,24 +12,25 @@ attempt_login() {
     fi
 
     if [[ -z "$host" ]]
-      then echo "user not set!"
+      then echo "host not set!"
       exit
     fi
 
-    SSHOPTIONS="-q -tt"
-    SSHOPTIONS="$SSHOPTIONS -o UserKnownHostsFile=/dev/null"
-    SSHOPTIONS="$SSHOPTIONS -o StrictHostKeyChecking=no"
-    SSHOPTIONS="$SSHOPTIONS -F /dev/null"
+    SSHOPTIONS="-F recruit/ssh_config"
+    #SSHOPTIONS="-q -tt"
+    #SSHOPTIONS="$SSHOPTIONS -o UserKnownHostsFile=/dev/null"
+    #SSHOPTIONS="$SSHOPTIONS -o StrictHostKeyChecking=no"
 
     CMD="$(which ssh)"
     if [[ -n "$key" ]]
       then
         XOPTS="-i${key} -o PasswordAuthentication=no"
+        PRECMD=""
       elif [[ -n "$passwd" ]]
       then
         XOPTS="-o PasswordAuthentication=yes"
         which sshpass > /dev/null || ( echo "please install sshpass" ; exit )
-        CMD="$(which sshpass) -p $passwd $CMD"
+        PRECMD="$(which sshpass) -p $passwd"
       else
         echo "attempt_login called with neither\$key nor \$passwd set"
         return 1
@@ -41,7 +38,7 @@ attempt_login() {
 
     # only get here if we have a key or a password
 
-    XCMD="${CMD} ${SSHOPTIONS} ${XOPTS} -l ${user} ${host}"
+    XCMD="$PRECMD ${CMD} ${SSHOPTIONS} ${XOPTS} -q -tt -l ${user} ${host}"
     ruser=$(${XCMD} sudo whoami)
 
     if [[ "$ruser" =~ "root" ]]
@@ -54,55 +51,90 @@ attempt_login() {
     fi
 }
 
+attempt_all_logins() {
+
+  if [[ -f "${key}" ]]
+    then
+      echo "trying key based login"
+      for user in cirros centos ubuntu
+      do
+        if attempt_login
+          then
+            # echo "succeeded with user ${user}"
+            xuser="${user}"
+            break
+          else
+            :
+            # echo "failed with user ${user}"
+        fi
+      done
+    else
+      echo "the key file (${key}) was not found"
+  fi
+  if [[ -z "$xuser" ]]
+    then
+      echo "trying password based login"
+      unset key
+      passwd="root"
+      user="root"
+      if attempt_login
+        then
+          # echo "succeeded with user ${user}"
+          xuser="${user}"
+        else
+          :
+          # echo "failed with user ${user}"
+      fi
+  fi
+}
+
+attempt_scp() {
+   tmpfile=$(mktemp /tmp/XXXXXX)
+   dd if=/dev/urandom of=$tmpfile count=1
+   echo "${PRECMD} scp -q ${SSHOPTIONS} $tmpfile ${SSHTARGET}:$tmpfile" 
+   ${PRECMD} scp -q ${SSHOPTIONS} "$tmpfile" "${SSHTARGET}:$tmpfile" 
+   echo "${PRECMD} scp -q ${SSHOPTIONS} ${SSHTARGET}:$tmpfile ${tmpfile}.copy" 
+   ${PRECMD} scp -q ${SSHOPTIONS} "${SSHTARGET}:$tmpfile" "${tmpfile}.copy" 
+   if diff -q "$tmpfile" "$tmpfile.copy"
+    then
+      echo "scp test - sucess!"
+      rval=0
+     else
+      echo "scp test: something went wrong!"
+      rval=1
+   fi
+   # rm "$tmpfile"
+   # rm -f "${tmpfile}.copy"
+   return $rval
+}
+#############################################################
+
+# main
+
+#############################################################
+
+defaultkey="/home/nic/.ssh/openstack_rsa"
+host="$1"
+
 which fping > /dev/null && fping $host
 
 if [[ -z $2 ]]
   then
     echo "using key from $defaultkey key"
-    cloudkey="$defaultkey"
+    key="$defaultkey"
   else
-    cloudkey="$2"
+    key="$2"
 fi
 
-if [[ -f "${cloudkey}" ]]
+if attempt_all_logins
   then
-    echo "trying key based login"
-    key="${cloudkey}"
-    for user in cirros centos ubuntu
-    do
-      if attempt_login
-        then
-          # echo "succeeded with user ${user}"
-          xuser="${user}"
-          break
-        else
-          :
-          # echo "failed with user ${user}"
-      fi
-    done
-  else
-    echo "the cloud key file (${cloudkey}) was not found"
-fi
-if [[ -z "$xuser" ]]
-  then
-    echo "trying password based login"
-    unset key
-    passwd="root"
-    user="root"
-    if attempt_login
-      then
-        # echo "succeeded with user ${user}"
-        xuser="${user}"
-      else
-        :
-        # echo "failed with user ${user}"
-    fi
-fi
-
-if [[ -z $xuser ]]
-  then
-    echo "all logins failed"
-  else
+    SSHOPTIONS="${SSHOPTIONS} ${XOPTS}"
+    SSHTARGET="${user}@${host}"
     echo "login succeeded with user '$xuser'"
-    echo "the required ssh command is: ${XCMD}"
+    echo "the required pre ssh command is: ${PRECMD}"
+    echo "the required ssh options are: ${SSHOPTIONS}"
+    echo "the required ssh target is: ${SSHTARGET}"
+    attempt_scp
+  else
+    echo "all logins failed"
 fi
