@@ -32,7 +32,7 @@ attempt_login() {
       elif [[ -n "$passwd" ]]
       then
         XOPTS="-o PasswordAuthentication=yes"
-        which sshpass || ( echo "please install sshpass" ; exit )
+        which sshpass > /dev/null || ( echo "please install sshpass" ; exit )
         CMD="$(which sshpass) -p $passwd $CMD"
       else
         echo "attempt_login called with neither\$key nor \$passwd set"
@@ -41,20 +41,20 @@ attempt_login() {
 
     # only get here if we have a key or a password
 
-    XCMD="${CMD} ${SSHOPTIONS} ${XOPTS} -l ${user} ${host} sudo whoami"
-    ruser=$(${XCMD})
+    XCMD="${CMD} ${SSHOPTIONS} ${XOPTS} -l ${user} ${host}"
+    ruser=$(${XCMD} sudo whoami)
 
     if [[ "$ruser" =~ "root" ]]
       then
-        echo "attempt_login() succeeded with user ${user}"
+        # echo "attempt_login() succeeded with user ${user}"
         return 0
       else
-        echo "attempt_login() failed with user ${user}"
+        # echo "attempt_login() failed with user ${user}"
         return 1
     fi
 }
 
-which fping && fping $host
+which fping > /dev/null && fping $host
 
 if [[ -z $2 ]]
   then
@@ -66,16 +66,18 @@ fi
 
 if [[ -f "${cloudkey}" ]]
   then
+    echo "trying key based login"
     key="${cloudkey}"
     for user in cirros centos ubuntu
     do
       if attempt_login
         then
-          echo "succeeded with user ${user}"
+          # echo "succeeded with user ${user}"
           xuser="${user}"
           break
         else
-          echo "failed with user ${user}"
+          :
+          # echo "failed with user ${user}"
       fi
     done
   else
@@ -89,10 +91,11 @@ if [[ -z "$xuser" ]]
     user="root"
     if attempt_login
       then
-        echo "succeeded with user ${user}"
+        # echo "succeeded with user ${user}"
         xuser="${user}"
       else
-        echo "failed with user ${user}"
+        :
+        # echo "failed with user ${user}"
     fi
 fi
 
@@ -100,5 +103,6 @@ if [[ -z $xuser ]]
   then
     echo "all logins failed"
   else
-    echo "login succeeded with '$xuser'"
+    echo "login succeeded with user '$xuser'"
+    echo "the required ssh command is: ${XCMD}"
 fi
