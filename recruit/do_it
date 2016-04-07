@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+useradd -d /home/admin -m admin 
+echo 'admin ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+sed -i -e '/requiretty/ d' /etc/sudoers
+sed -i -e '/^PasswordAuthentication/ s/no/yes/' /etc/ssh/sshd_config
