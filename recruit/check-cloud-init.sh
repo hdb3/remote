@@ -16,19 +16,30 @@ attempt_login() {
       exit
     fi
 
-    SSHOPTIONS="-F recruit/ssh_config"
+    SSHOPTIONS=""
+    SSHOPTIONS="$SSHOPTIONS -o UserKnownHostsFile=/dev/null"
+    SSHOPTIONS="$SSHOPTIONS -o StrictHostKeyChecking=no"
+    SSHOPTIONS="$SSHOPTIONS -o ControlPath=none"
+    SSHOPTIONS="$SSHOPTIONS -o ConnectionAttempts=20"
+    SSHOPTIONS="$SSHOPTIONS -o ConnectTimeout=1"
+    SSHOPTIONS="$SSHOPTIONS -o LogLevel=QUIET" # or FATAL, ERROR, INFO, VERBOSE, DEBUG
+
+    # this option is fine except that ssh-copy-id doesn't support it (though it uses ssh so it could....)
+    # 
+    #SSHOPTIONS="-F recruit/ssh_config"
+
+    # similarly, -tt is not an option to scp.... (as it wouldn't be needed). And ssh-copy-id doesn't need it
+    # the reson it is used here is that sudo typically requires a tty, so the initial probe which has to check for an sudo user must use it.
     #SSHOPTIONS="-q -tt"
-    #SSHOPTIONS="$SSHOPTIONS -o UserKnownHostsFile=/dev/null"
-    #SSHOPTIONS="$SSHOPTIONS -o StrictHostKeyChecking=no"
 
     CMD="$(which ssh)"
     if [[ -n "$key" ]]
       then
-        XOPTS="-i${key} -o PasswordAuthentication=no"
+        XOPTS="-o IdentityFile=${key} -o PasswordAuthentication=no"
         PRECMD=""
       elif [[ -n "$passwd" ]]
       then
-        XOPTS="-o PasswordAuthentication=yes"
+        XOPTS="-o PasswordAuthentication=yes -o PubkeyAuthentication=no"
         which sshpass > /dev/null || ( echo "please install sshpass" ; exit )
         PRECMD="$(which sshpass) -p $passwd"
       else
