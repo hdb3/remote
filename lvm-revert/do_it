@@ -1,0 +1,15 @@
+#!/bin/bash -ev
+#if [[ -z "$1" ]]
+#then
+    #echo "usage: $0 <snapshotname>"
+    #exit
+#fi
+VG="$(vgs --noheadings -o vg_name)"
+# should check for more or less than exactly one volume group here
+# should check that the snapshot name exists....
+lvdisplay ${VG}/centos-root-snapshot-01
+lvrename ${VG}/centos-root-snapshot-01 ${VG}/tmp
+lvcreate -s -n centos-root-snapshot-01 ${VG}/tmp
+lvconvert --merge ${VG}/tmp
+reboot --force
+exit
