@@ -172,7 +172,7 @@ if attempt_all_logins
     ssh_sudo "useradd -d /home/admin -m admin"
     ssh_sudo "echo 'admin ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
     ssh_sudo "mkdir /home/admin/.ssh"
-    ssh_sudo "echo $(<${key}) >> /home/admin/.ssh/authorized_keys"
+    ssh_sudo "echo $( <${key} ) >> /home/admin/.ssh/authorized_keys"
     ssh_sudo "chown admin:admin -R /home/admin/.ssh"
   else
     recho "all logins failed"
