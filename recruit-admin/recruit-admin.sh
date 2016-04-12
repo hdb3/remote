@@ -153,7 +153,7 @@ host="$1"
 user="$2"
 passwd="$3"
 key="$4"
-keytext="$(<$4)"
+adminpubkeytext="$(<recruit/adminkey.pub)"
 
 which sshpass > /dev/null || ( echo "please install sshpass" ; exit )
 which fping > /dev/null || ( echo "please install fping" ; exit )
@@ -173,7 +173,7 @@ if attempt_all_logins
     ssh_sudo "useradd -d /home/admin -m admin"
     ssh_sudo "echo 'admin ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
     ssh_sudo "mkdir /home/admin/.ssh"
-    ssh_sudo "echo \"${keytext}\" >> /home/admin/.ssh/authorized_keys"
+    ssh_sudo "echo ${adminpubkeytext} >> /home/admin/.ssh/authorized_keys"
     ssh_sudo "chown admin:admin -R /home/admin/.ssh"
   else
     recho "all logins failed"
