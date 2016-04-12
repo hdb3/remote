@@ -1,0 +1,5 @@
+
+on a new user machine check that 
+1) fping is installed
+2) sshpass is installed
+3) there is an idenity (ssh-key)
