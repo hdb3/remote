@@ -50,7 +50,6 @@ attempt_login() {
       elif [[ -n "$passwd" ]]
       then
         XOPTS="-o PasswordAuthentication=yes -o PubkeyAuthentication=no"
-        which sshpass > /dev/null || ( echo "please install sshpass" ; exit )
         PRECMD="$(which sshpass) -p $passwd"
       else
         recho "attempt_login called with neither\$key nor \$passwd set"
@@ -155,7 +154,9 @@ user="$2"
 passwd="$3"
 key="$4"
 
-which fping > /dev/null && fping $host > /dev/null
+which sshpass > /dev/null || ( echo "please install sshpass" ; exit )
+which fping > /dev/null || ( echo "please install fping" ; exit )
+fping $host > /dev/null
 
 if attempt_all_logins
   then
