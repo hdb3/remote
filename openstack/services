@@ -1,10 +1,10 @@
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
-  CONTROLLER_SERVICES="openstack-nova-api openstack-nova-cert openstack-nova-consoleauth openstack-nova-scheduler openstack-nova-conductor openstack-nova-novncproxy ksm"
+  CONTROLLER_SERVICES="openstack-nova-api openstack-nova-cert openstack-nova-consoleauth openstack-nova-scheduler openstack-nova-conductor openstack-nova-novncproxy"
 fi
 
 if [[ $MY_ROLE =~ "compute" ]] ; then
-  COMPUTE_SERVICES="openvswitch libvirtd openstack-nova-compute"
+  COMPUTE_SERVICES="openvswitch libvirtd openstack-nova-compute ksm"
   NETWORK_SERVICES="openvswitch neutron-openvswitch-agent "
 fi
 
