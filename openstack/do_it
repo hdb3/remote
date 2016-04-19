@@ -3,6 +3,17 @@
 echo "centos:centos" | sudo chpasswd
 set +e
 mkdir -p /tmp/install_lock
+
+set -a # this ensures the variables set in the next step are exported to subsequent commands...
+source config
+if [ -n "$LOCALREPO" ]
+  then
+    sudo yum -q  -y install epel-release deltarpm
+  else
+    sudo rm -rf /etc/yum.repos.d/*
+    sudo cp local.repo /etc/yum.repos.d/
+fi
+
 ip route show | grep default > defroute
 sudo dhclient eth1
 sudo ip link set dev eth2 up
@@ -11,12 +22,8 @@ sudo ip route change $(cat defroute)
 set -e
  # need to know how many interfaces are really needed - aimed at virtualised hosts really...
 # this is so that subsequent subnet probes find assigned IP addresses
-sudo yum -q  -y install epel-release deltarpm
 sudo yum -q  -y install python-netifaces python-pip # python-ipaddress python-colorama # colorama and ipaddress not available in Centos7 epel?
 sudo pip install py2-ipaddress colorama # not needed if the RPMs have the packages...
-
-set -a # this ensures the variables set in the next step are exported to subsequent commands...
-source config
 $(./role.py)
 if [[ $OPENSTACK_INSTALL == "yes" ]] ; then
   echo "Local configuration detected and valid role found"
