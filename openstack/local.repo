@@ -1,0 +1,15 @@
+[base]
+name=Local CentOS Repo
+baseurl=http://dell0/CentOS/7/os/x86_64/
+gpgcheck=0
+
+[updates]
+name=Local CentOS Repo
+baseurl=http://dell0/CentOS/7/updates/x86_64/
+gpgcheck=0
+
+[epel]
+name=Local CentOS Repo
+baseurl=http://dell0/epel/7/x86_64/
+gpgcheck=0
+enabled=1
