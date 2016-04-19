@@ -8,10 +8,10 @@ set -a # this ensures the variables set in the next step are exported to subsequ
 source config
 if [ -n "$LOCALREPO" ]
   then
-    sudo yum -q  -y install epel-release deltarpm
-  else
     sudo rm -rf /etc/yum.repos.d/*
     sudo cp local.repo /etc/yum.repos.d/
+  else
+    sudo yum -q  -y install epel-release deltarpm
 fi
 
 ip route show | grep default > defroute
