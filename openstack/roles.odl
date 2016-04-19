@@ -1,3 +1,5 @@
-10.30.65.205 controller
-10.30.65.205 network
-10.30.65.205 compute
+10.30.66.60 controller
+10.30.66.61 compute
+10.30.66.62 compute
+10.30.66.65 compute
+10.30.66.63 network
