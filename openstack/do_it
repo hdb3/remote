@@ -13,12 +13,37 @@ if [ -n "$LOCALREPO" ]
   else
     sudo yum -q  -y install epel-release deltarpm
 fi
+# the following code is specific to RHEL/Centos based systems which need to use DHCP to acquire addresess on secondary network interfaces,
+# and where those interfaces have the canonical names 'eth0', 'eth1, 'eth2', etc
+# this is typically only the case for  virtualised (nested test envioronments).
+# a more generic solution should attempt to discover physical interfaces which do not have corresponding persistent configuration files
+# and then build configuration files based on both the interface name/physical address and also the ditsribution class
+grep DEFROUTE /etc/sysconfig/network-scripts/ifcfg-eth0 || echo "DEFROUTE=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+for intf in eth1 eth2
+do
+  if ip li|grep -q $intf
+  then
+    echo "$intf found"
+    cp -n /etc/sysconfig/network-scripts/ifcfg-eth0 "/etc/sysconfig/network-scripts/ifcfg-$intf" && sed -i -e "/DEVICE/s/eth0/$intf/" "/etc/sysconfig/network-scripts/ifcfg-$intf"
+    if grep -q DEFROUTE "/etc/sysconfig/network-scripts/ifcfg-$intf"
+    then
+      sed -i -e "/DEFROUTE/s/yes/no/" "/etc/sysconfig/network-scripts/ifcfg-$intf"
+    else
+      echo "DEFROUTE=no" >> "/etc/sysconfig/network-scripts/ifcfg-$intf"
+    fi
+    ifup "$intf"
+  else
+    echo "no $intf found"
+  fi
+done
 
-ip route show | grep default > defroute
-sudo dhclient eth1
-sudo ip link set dev eth2 up
-sudo dhclient -x eth2
-sudo ip route change $(cat defroute)
+# # this is the old version of the dynamic interface address managment code
+# # remove once it is clear that it is not better than the new version above....
+# # ip route show | grep default > defroute
+# # sudo dhclient eth1
+# # sudo ip link set dev eth2 up
+# # sudo dhclient -x eth2
+# # sudo ip route change $(cat defroute)
 set -e
  # need to know how many interfaces are really needed - aimed at virtualised hosts really...
 # this is so that subsequent subnet probes find assigned IP addresses
