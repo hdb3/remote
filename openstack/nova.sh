@@ -17,7 +17,11 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
   crudini --set --verbose /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
   # crudini --set --verbose /etc/nova/nova.conf libvirt qemu
-  crudini --set --verbose /etc/nova/nova.conf libvirt virt_type qemu
+  if [[ "x$VIRTMODE" == "x" ]] ; then
+    crudini --set --verbose /etc/nova/nova.conf libvirt virt_type kvm
+  else
+    crudini --set --verbose /etc/nova/nova.conf libvirt virt_type $VIRTMODE
+  fi
 
   crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
   crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid openstack
