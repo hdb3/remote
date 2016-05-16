@@ -1,1 +1,5 @@
-roles.odl
+10.30.66.70 controller
+10.30.66.74 network
+10.30.66.71 compute
+10.30.66.72 compute
+10.30.66.73 compute
