@@ -1,6 +1,6 @@
 source creds
 #variables
-EXNET=10.30.65 INNET=10.30.67
+EXNET=10.30.65 INNET=10.30.67 DNSSERVER=10.30.65.200
 export VSUBNETNAME=testnet VNETNAME=testnet INTERNALNETWORK="172.16.42.0/24" VMNAME=testvm1 \
 EXTERNALNETNAME=extnet EXTERNALSUBNETNAME=extsubnet PHYSICALNETWORK=external EXTERNALNETWORK="$EXNET.0/24" \
 EXTERNALGW=$EXNET.1 EXTERNALSTART=$EXNET.170 EXTERNALEND=$EXNET.179 DNS=10.30.65.200 ROUTER=r1 \
@@ -12,7 +12,7 @@ neutron subnet-create --name $EXTERNALSUBNETNAME --dns-nameserver $DNS --enable-
 
 # routed network
 neutron net-create $ROUTEDNETNAME
-neutron subnet-create --name $ROUTEDSUBNETNAME $ROUTEDNETNAME $ROUTEDNETWORK
+neutron subnet-create --dns-nameserver=$DNSSERVER --name $ROUTEDSUBNETNAME $ROUTEDNETNAME $ROUTEDNETWORK
 neutron router-create $ROUTEDROUTER
 neutron router-interface-add $ROUTEDROUTER $ROUTEDSUBNETNAME
 neutron router-gateway-set --disable-snat --fixed-ip ip_address=$ROUTEDEXTERNALGW $ROUTEDROUTER $EXTERNALNETNAME
