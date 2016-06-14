@@ -17,7 +17,7 @@ neutron router-create $ROUTEDROUTER
 neutron router-interface-add $ROUTEDROUTER $ROUTEDSUBNETNAME
 neutron router-gateway-set --disable-snat --fixed-ip ip_address=$ROUTEDEXTERNALGW $ROUTEDROUTER $EXTERNALNETNAME
 export NETID=`neutron net-list| awk '/ routed-net / {print $2}'`
-openstack server create --flavor m1.small --image cirros-0.3.3-x86_64 --nic net-id=$(neutron net-list| awk "/ $ROUTEDNETNAME / {print \$2}") --poll $ROUTEDVM
+openstack server create --flavor m1.small --image cirros-0.3.3-x86_64 --nic net-id=$(neutron net-list| awk "/ $ROUTEDNETNAME / {print \$2}") --wait $ROUTEDVM
 
 exit
 
