@@ -23,6 +23,7 @@ openstack service create --name keystone --description "OpenStack Identity" iden
 openstack project create --description "Admin Project" admin
 openstack user create --password $ADMIN_PWD admin
 openstack role create admin
+openstack role create user
 openstack role add --project admin --user admin admin
 openstack project create --description "Service Project" service
 openstack endpoint create --publicurl http://$CONTROLLER_IP:5000/v2.0 --internalurl http://$CONTROLLER_IP:5000/v2.0 --adminurl http://$CONTROLLER_IP:35357/v2.0 --region RegionOne identity
