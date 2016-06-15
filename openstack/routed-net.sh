@@ -11,7 +11,7 @@ neutron net-create $EXTERNALNETNAME --router:external --provider:physical_networ
 neutron subnet-create --name $EXTERNALSUBNETNAME --dns-nameserver $DNS --enable-dhcp --gateway $EXTERNALGW --allocation-pool start=$EXTERNALSTART,end=$EXTERNALEND $EXTERNALNETNAME $EXTERNALNETWORK
 
 # routed network
-neutron net-create $ROUTEDNETNAME
+neutron net-create $ROUTEDNETNAME --shared
 neutron subnet-create --dns-nameserver=$DNSSERVER --name $ROUTEDSUBNETNAME $ROUTEDNETNAME $ROUTEDNETWORK
 neutron router-create $ROUTEDROUTER
 neutron router-interface-add $ROUTEDROUTER $ROUTEDSUBNETNAME

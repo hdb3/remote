@@ -37,6 +37,11 @@ do
   fi
 done
 
+# this should not be necessaary! but for some reaon the "DEFROUTE=no" seems not to work in every case!
+# I suspect that if the DHCP server gives an explicit g/w then this option is ignored
+# i.e. only if the client DHCP is inferring a g/w where none is given will this affect the behaviour....
+ifdown eth0 ; ifup eth0
+
 # # this is the old version of the dynamic interface address managment code
 # # remove once it is clear that it is not better than the new version above....
 # # ip route show | grep default > defroute
