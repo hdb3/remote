@@ -10,8 +10,8 @@ crudini --set --verbose /etc/cinder/cinder.conf DEFAULT my_ip $CONTROLLER_IP
 crudini --set --verbose /etc/cinder/cinder.conf DEFAULT auth_strategy keystone
 
 crudini --set --verbose /etc/cinder/cinder.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
-crudini --set --verbose /etc/cinder/cinder.conf oslo_messaging_rabbit rabbit_userid openstack
-crudini --set --verbose /etc/cinder/cinder.conf oslo_messaging_rabbit rabbit_password $SERVICE_PWD
+crudini --set --verbose /etc/cinder/cinder.conf oslo_messaging_rabbit rabbit_userid $RABBIT_USER
+crudini --set --verbose /etc/cinder/cinder.conf oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
 
 crudini --set --verbose /etc/cinder/cinder.conf oslo_concurrency lock_path /var/lock/cinder
 
