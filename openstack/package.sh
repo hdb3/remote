@@ -1,6 +1,8 @@
 
 yum -y -q install yum-plugin-priorities
-if [[ $OSRELEASE == "liberty" ]] ; then
+if [[ $OSRELEASE == "mitaka" ]] ; then
+      yum -y -q install centos-release-openstack-mitaka
+elif [[ $OSRELEASE == "liberty" ]] ; then
   if [ -n "$LOCALREPO" ]
     then
       :
