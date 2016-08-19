@@ -16,7 +16,7 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
 systemctl enable rabbitmq-server
 systemctl restart rabbitmq-server
 
-rabbitmqctl add_user openstack Service123 || echo "not needed"
+rabbitmqctl add_user $RABBIT_USER $RABBIT_PASSWORD || echo "not needed"
 rabbitmqctl set_permissions openstack ".*" ".*" ".*"
 
 systemctl enable memcached

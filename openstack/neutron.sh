@@ -18,8 +18,8 @@ crudini --set --verbose  /etc/neutron/neutron.conf DEFAULT notify_nova_on_port_d
 crudini --set --verbose  /etc/neutron/neutron.conf DEFAULT nova_url  http://$CONTROLLER_IP:8774/v2
 
 crudini --set --verbose  /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
-crudini --set --verbose  /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_userid openstack
-crudini --set --verbose  /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_password $SERVICE_PWD
+crudini --set --verbose  /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_userid $RABBIT_USER
+crudini --set --verbose  /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
 
 crudini --set --verbose  /etc/neutron/neutron.conf nova auth_url  http://$CONTROLLER_IP:35357
 crudini --set --verbose  /etc/neutron/neutron.conf nova auth_plugin password

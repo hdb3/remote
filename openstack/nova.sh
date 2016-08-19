@@ -24,8 +24,8 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   fi
 
   crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
-  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid openstack
-  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_password $SERVICE_PWD
+  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid $RABBIT_USER
+  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
 
   crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
   crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_url http://$CONTROLLER_IP:35357
