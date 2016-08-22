@@ -2,7 +2,7 @@
 source creds
 
 #create keystone entries for glance
-openstack user create --password $SERVICE_PWD glance
+openstack user create --domain default --password $SERVICE_PWD glance
 openstack role add --project service --user glance admin
 openstack service create --name glance --description "OpenStack Image service" image
 openstack endpoint create --publicurl http://$CONTROLLER_IP:9292 --internalurl http://$CONTROLLER_IP:9292 --adminurl http://$CONTROLLER_IP:9292 --region RegionOne image

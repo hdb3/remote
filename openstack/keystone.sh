@@ -45,10 +45,9 @@ openstack role add --project demo --user demo user
 unset OS_TOKEN OS_URL
 
 #create credentials file
-echo "export OS_PROJECT_DOMAIN_ID=default" >> creds
-echo "export OS_USER_DOMAIN_ID=default" >> creds
+echo "export OS_PROJECT_DOMAIN_NAME=default" >> creds
+echo "export OS_USER_DOMAIN_NAME=default" >> creds
 echo "export OS_PROJECT_NAME=admin" >> creds
-echo "export OS_TENANT_NAME=admin" >> creds
 echo "export OS_USERNAME=admin" >> creds
 echo "export OS_PASSWORD=$ADMIN_PWD" >> creds
 echo "export OS_AUTH_URL=http://$CONTROLLER_IP:35357/v3" >> creds
