@@ -1,6 +1,7 @@
 #!/bin/bash -ev
+localdir=`dirname $0`
 source creds
-openstack keypair create --public-key openstack_rsa.pub openstack_rsa
+openstack keypair create --public-key $localdir/openstack_rsa.pub openstack_rsa
 neutron net-create testnet
 export NETID=`neutron net-list| awk '/ testnet / {print $2}'`
 neutron subnet-create --name testnet testnet 172.16.42.0/24
