@@ -88,4 +88,5 @@ fi
 
 if [[ $MY_ROLE =~ "compute" ]] ; then
   systemctl enable --now $COMPUTE_NEUTRON_SERVICES
+  systemctl restart neutron-dhcp-agent neutron-metadata-agent neutron-linuxbridge-agent neutron-l3-agent
 fi
