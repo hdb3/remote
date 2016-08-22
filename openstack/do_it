@@ -66,8 +66,8 @@ fi
 if [ -n "$CALICO" ]; then sudo -E bash -ev calico-package.sh ; fi
 sudo -E bash -ev package.sh
 source services
-sudo systemctl stop $NETWORK_NOVA_SERVICES $COMPUTE_NOVA_SERVICES $CONTROLLER_NOVA_SERVICES
-sudo systemctl stop $NETWORK_NEUTRON_SERVICES $COMPUTE_NEUTRON_SERVICES $CONTROLLER_NEUTRON_SERVICES
+#sudo systemctl stop $NETWORK_NOVA_SERVICES $COMPUTE_NOVA_SERVICES $CONTROLLER_NOVA_SERVICES
+#sudo systemctl stop $NETWORK_NEUTRON_SERVICES $COMPUTE_NEUTRON_SERVICES $CONTROLLER_NEUTRON_SERVICES
 sudo -E bash -ev preflight.sh
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"

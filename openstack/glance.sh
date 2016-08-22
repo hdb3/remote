@@ -52,5 +52,14 @@ then
 else
   wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 fi
-glance image-create --name "cirros-0.3.3-x86_64" --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --container-format bare --progress
-glance image-list
+# it can take a short while before glance service is available....
+until openstack image list
+do
+  echo "retrying image list..."
+done
+openstack image create --public --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --container-format bare "cirros-0.3.3-x86_64"
+#until openstack image create --public --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --container-format bare "cirros-0.3.3-x86_64"
+#do
+  #echo "retrying image create..."
+#done
+#openstack image list
