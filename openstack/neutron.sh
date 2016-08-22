@@ -64,7 +64,8 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
   crudini --set --verbose /etc/neutron/plugins/ml2/linuxbridge_agent.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
   crudini --set --verbose /etc/neutron/l3_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.BridgeInterfaceDriver
-  crudini --set --verbose /etc/neutron/l3_agent.ini DEFAULT external_network_bridge br-ex
+  crudini --set --verbose /etc/neutron/l3_agent.ini DEFAULT external_network_bridge
+  #crudini --set --verbose /etc/neutron/l3_agent.ini DEFAULT external_network_bridge br-ex
 
   crudini --set --verbose /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.BridgeInterfaceDriver
   crudini --set --verbose /etc/neutron/dhcp_agent.ini DEFAULT dhcp_driver neutron.agent.linux.dhcp.Dnsmasq
