@@ -30,6 +30,7 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
 
   crudini --set --verbose /etc/nova/nova.conf vnc vncserver_listen 0.0.0.0
   crudini --set --verbose /etc/nova/nova.conf vnc vncserver_proxyclient_address $MY_IP
+  crudini --set --verbose /etc/nova/nova.conf vnc novncproxy_base_url http://$CONTROLLER_IP:6080/vnc_auto.html
 
   if [[ "x$VIRTMODE" == "x" ]] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt virt_type kvm
@@ -50,6 +51,9 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf neutron project_name service
   crudini --set --verbose /etc/nova/nova.conf neutron username neutron
   crudini --set --verbose /etc/nova/nova.conf neutron password $SERVICE_PWD
+
+  crudini --set --verbose /etc/nova/nova.conf neutron service_metadata_proxy True
+  crudini --set --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret $METADATA_SECRET
 fi
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
