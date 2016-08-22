@@ -4,7 +4,7 @@ for f in /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/ml2_conf.ini ; do
   sed -i -e "/^$/d" $f
 done
 
-crudini --set --verbose /etc/neutron/neutron.conf database connection mysql+pymsql://neutron:$DBPASSWD@$CONTROLLER_IP/neutron
+crudini --set --verbose /etc/neutron/neutron.conf database connection mysql+pymysql://neutron:$DBPASSWD@$CONTROLLER_IP/neutron
 
 crudini --set --verbose /etc/neutron/neutron.conf DEFAULT rpc_backend rabbit
 crudini --set --verbose /etc/neutron/neutron.conf DEFAULT auth_strategy keystone
