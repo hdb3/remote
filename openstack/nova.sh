@@ -5,8 +5,8 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   sed -i -e "/^$/d" /etc/nova/nova.conf
 
   crudini --set --verbose /etc/nova/nova.conf DEFAULT enabled_apis osapi_compute,metadata
-  crudini --set --verbose /etc/nova/nova.conf api_database connection mysql+pymysql://nova:NOVA_DBPASS@$CONTROLLER_IP/nova_api
-  crudini --set --verbose /etc/nova/nova.conf database connection mysql+pymysql://nova:NOVA_DBPASS@$CONTROLLER_IP/nova
+  crudini --set --verbose /etc/nova/nova.conf api_database connection mysql+pymysql://nova:$DBPASSWD@$CONTROLLER_IP/nova_api
+  crudini --set --verbose /etc/nova/nova.conf database connection mysql+pymysql://nova:$DBPASSWD@$CONTROLLER_IP/nova
   crudini --set --verbose /etc/nova/nova.conf DEFAULT rpc_backend rabbit
 
   crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP

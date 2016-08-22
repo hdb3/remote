@@ -65,7 +65,7 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
   crudini --set --verbose /etc/neutron/dhcp_agent.ini DEFAULT enable_isolated_metadata True
 
   source creds
-  openstack user create --password $SERVICE_PWD neutron
+  openstack user create --domain default --password $SERVICE_PWD neutron
   openstack role add --project service --user neutron admin
   openstack service create --name neutron --description "OpenStack Networking" network
   openstack endpoint create --region RegionOne network public http://$CONTROLLER_IP:9696
