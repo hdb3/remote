@@ -5,8 +5,8 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   sed -i -e "/^$/d" /etc/nova/nova.conf
 
   crudini --set --verbose /etc/nova/nova.conf DEFAULT enabled_apis osapi_compute,metadata
-  crudini --set --verbose /etc/nova/nova.conf api_database connection mysql+pymysql://nova:NOVA_DBPASS@controller/nova_api
-  crudini --set --verbose /etc/nova/nova.conf database connection mysql+pymysql://nova:NOVA_DBPASS@controller/nova
+  crudini --set --verbose /etc/nova/nova.conf api_database connection mysql+pymysql://nova:NOVA_DBPASS@$CONTROLLER_IP/nova_api
+  crudini --set --verbose /etc/nova/nova.conf database connection mysql+pymysql://nova:NOVA_DBPASS@$CONTROLLER_IP/nova
   crudini --set --verbose /etc/nova/nova.conf DEFAULT rpc_backend rabbit
 
   crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
@@ -30,14 +30,7 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
 
   crudini --set --verbose /etc/nova/nova.conf vnc vncserver_listen 0.0.0.0
   crudini --set --verbose /etc/nova/nova.conf vnc vncserver_proxyclient_address $MY_IP
-# ===============================
 
-# crudini --set --verbose /etc/nova/nova.conf DEFAULT novncproxy_base_url  http://$CONTROLLER_IP:6080/vnc_auto.html
-# crudini --set --verbose /etc/nova/nova.conf DEFAULT network_api_class nova.network.neutronv2.api.API
-# crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
-# crudini --set --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
-
-  # crudini --set --verbose /etc/nova/nova.conf libvirt qemu
   if [[ "x$VIRTMODE" == "x" ]] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt virt_type kvm
   else
@@ -49,13 +42,6 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
 
   crudini --set --verbose /etc/nova/nova.conf neutron url http://$CONTROLLER_IP:9696
   crudini --set --verbose /etc/nova/nova.conf neutron auth_url http://$CONTROLLER_IP:35357
-  #crudini --set --verbose /etc/nova/nova.conf neutron auth_strategy keystone
-  #crudini --set --verbose /etc/nova/nova.conf neutron admin_auth_url http://$CONTROLLER_IP:35357/v2.0
-  #crudini --set --verbose /etc/nova/nova.conf neutron admin_tenant_name service
-  #crudini --set --verbose /etc/nova/nova.conf neutron admin_username neutron
-  #crudini --set --verbose /etc/nova/nova.conf neutron admin_password $SERVICE_PWD
-  #crudini --set --verbose /etc/nova/nova.conf neutron service_metadata_proxy True
-  #crudini --set --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret $META_PWD
 
   crudini --set --verbose /etc/nova/nova.conf neutron auth_type password
   crudini --set --verbose /etc/nova/nova.conf neutron project_domain_name default
