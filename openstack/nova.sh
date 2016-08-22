@@ -4,18 +4,39 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   sed -i -e "/^#/d" /etc/nova/nova.conf
   sed -i -e "/^$/d" /etc/nova/nova.conf
 
-  crudini --set --verbose /etc/nova/nova.conf database connection mysql://nova:$DBPASSWD@$CONTROLLER_IP/nova
-
+  crudini --set --verbose /etc/nova/nova.conf DEFAULT enabled_apis osapi_compute,metadata
+  crudini --set --verbose /etc/nova/nova.conf api_database connection mysql+pymysql://nova:NOVA_DBPASS@controller/nova_api
+  crudini --set --verbose /etc/nova/nova.conf database connection mysql+pymysql://nova:NOVA_DBPASS@controller/nova
   crudini --set --verbose /etc/nova/nova.conf DEFAULT rpc_backend rabbit
+
+  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
+  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid $RABBIT_USER
+  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
+
   crudini --set --verbose /etc/nova/nova.conf DEFAULT auth_strategy keystone
+
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_url http://$CONTROLLER_IP:35357
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken memcached_servers = $CONTROLLER_IP:11211
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_type password
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken project_domain_name default
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken user_domain_name default
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken project_name service
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken username nova
+  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken password $SERVICE_PWD
   crudini --set --verbose /etc/nova/nova.conf DEFAULT my_ip $MY_IP
-  crudini --set --verbose /etc/nova/nova.conf DEFAULT vncserver_listen 0.0.0.0
-  crudini --set --verbose /etc/nova/nova.conf DEFAULT vncserver_proxyclient_address $MY_IP
-  crudini --set --verbose /etc/nova/nova.conf DEFAULT novncproxy_base_url  http://$CONTROLLER_IP:6080/vnc_auto.html
-  crudini --set --verbose /etc/nova/nova.conf DEFAULT network_api_class nova.network.neutronv2.api.API
-  crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
-  crudini --set --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
+  crudini --set --verbose /etc/nova/nova.conf DEFAULT use_neutron True
   crudini --set --verbose /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
+
+  crudini --set --verbose /etc/nova/nova.conf vnc vncserver_listen 0.0.0.0
+  crudini --set --verbose /etc/nova/nova.conf vnc vncserver_proxyclient_address $MY_IP
+# ===============================
+
+# crudini --set --verbose /etc/nova/nova.conf DEFAULT novncproxy_base_url  http://$CONTROLLER_IP:6080/vnc_auto.html
+# crudini --set --verbose /etc/nova/nova.conf DEFAULT network_api_class nova.network.neutronv2.api.API
+# crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
+# crudini --set --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
+
   # crudini --set --verbose /etc/nova/nova.conf libvirt qemu
   if [[ "x$VIRTMODE" == "x" ]] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt virt_type kvm
@@ -23,42 +44,40 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt virt_type $VIRTMODE
   fi
 
-  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
-  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid $RABBIT_USER
-  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
-
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_url http://$CONTROLLER_IP:35357
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_plugin password
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken project_domain_id default
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken user_domain_id default
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken project_name service
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken username nova
-  crudini --set --verbose /etc/nova/nova.conf keystone_authtoken password $SERVICE_PWD
 
   crudini --set --verbose /etc/nova/nova.conf glance host $CONTROLLER_IP
 
   crudini --set --verbose /etc/nova/nova.conf neutron url http://$CONTROLLER_IP:9696
-  crudini --set --verbose /etc/nova/nova.conf neutron auth_strategy keystone
-  crudini --set --verbose /etc/nova/nova.conf neutron admin_auth_url http://$CONTROLLER_IP:35357/v2.0
-  crudini --set --verbose /etc/nova/nova.conf neutron admin_tenant_name service
-  crudini --set --verbose /etc/nova/nova.conf neutron admin_username neutron
-  crudini --set --verbose /etc/nova/nova.conf neutron admin_password $SERVICE_PWD
-  crudini --set --verbose /etc/nova/nova.conf neutron service_metadata_proxy True
-  crudini --set --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret $META_PWD
+  crudini --set --verbose /etc/nova/nova.conf neutron auth_url http://$CONTROLLER_IP:35357
+  #crudini --set --verbose /etc/nova/nova.conf neutron auth_strategy keystone
+  #crudini --set --verbose /etc/nova/nova.conf neutron admin_auth_url http://$CONTROLLER_IP:35357/v2.0
+  #crudini --set --verbose /etc/nova/nova.conf neutron admin_tenant_name service
+  #crudini --set --verbose /etc/nova/nova.conf neutron admin_username neutron
+  #crudini --set --verbose /etc/nova/nova.conf neutron admin_password $SERVICE_PWD
+  #crudini --set --verbose /etc/nova/nova.conf neutron service_metadata_proxy True
+  #crudini --set --verbose /etc/nova/nova.conf neutron metadata_proxy_shared_secret $META_PWD
+
+  crudini --set --verbose /etc/nova/nova.conf neutron auth_type password
+  crudini --set --verbose /etc/nova/nova.conf neutron project_domain_name default
+  crudini --set --verbose /etc/nova/nova.conf neutron user_domain_name default
+  crudini --set --verbose /etc/nova/nova.conf neutron region_name RegionOne
+  crudini --set --verbose /etc/nova/nova.conf neutron project_name service
+  crudini --set --verbose /etc/nova/nova.conf neutron username neutron
+  crudini --set --verbose /etc/nova/nova.conf neutron password $SERVICE_PWD
 fi
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"
   source creds
-  openstack user create --password $SERVICE_PWD nova
+  openstack user create --domain default --password $SERVICE_PWD nova
   openstack role add --project service --user nova admin
   openstack service create --name nova --description "OpenStack Compute" compute
-  openstack endpoint create  --publicurl http://$CONTROLLER_IP:8774/v2/%\(tenant_id\)s --internalurl http://$CONTROLLER_IP:8774/v2/%\(tenant_id\)s --adminurl http://$CONTROLLER_IP:8774/v2/%\(tenant_id\)s --region RegionOne compute
+  openstack endpoint create --region RegionOne compute public http://$CONTROLLER_IP:8774/v2.1/%\(tenant_id\)s
+  openstack endpoint create --region RegionOne compute internal http://$CONTROLLER_IP:8774/v2.1/%\(tenant_id\)s
+  openstack endpoint create --region RegionOne compute admin http://$CONTROLLER_IP:8774/v2.1/%\(tenant_id\)s
+  su -s /bin/sh -c "nova-manage api_db sync" nova
   su -s /bin/sh -c "nova-manage db sync" nova
-   #CONTROLLER_SERVICES="openstack-nova-api openstack-nova-cert openstack-nova-consoleauth openstack-nova-scheduler openstack-nova-conductor openstack-nova-novncproxy"
-  systemctl enable $CONTROLLER_SERVICES
-  systemctl start $CONTROLLER_SERVICES
+  systemctl enable --now $CONTROLLER_NOVA_SERVICES
 fi
 
 if [[ $MY_ROLE =~ "compute" ]] ; then
@@ -68,8 +87,7 @@ if [[ $MY_ROLE =~ "compute" ]] ; then
   # echo 'net.bridge.bridge-nf-call-iptables=1' >> /etc/sysctl.conf
   # echo 'net.bridge.bridge-nf-call-ip6tables=1' >> /etc/sysctl.conf
   sysctl -p
+  crudini --set --verbose /etc/nova/nova.conf glance api_servers = http://$CONTROLLER_IP:9292
   crudini --set --verbose /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
-   #COMPUTE_SERVICES="openvswitch libvirtd openstack-nova-compute"
-  systemctl enable $COMPUTE_SERVICES
-  systemctl start $COMPUTE_SERVICES
+  systemctl enable --now $COMPUTE_NOVA_SERVICES
 fi

@@ -1,13 +1,11 @@
 
-if [[ $MY_ROLE =~ "controller" ]] ; then
-  CONTROLLER_SERVICES="openstack-nova-api openstack-nova-cert openstack-nova-consoleauth openstack-nova-scheduler openstack-nova-conductor openstack-nova-novncproxy"
+if [[ ${USE_OVS^^} =~ "YES" ]] ; then
+  CONTROLLER_NEUTRON_SERVICES="neutron-server neutron-dhcp-agent neutron-metadata-agent neutron-l3-agent"
+  COMPUTE_NEUTRON_SERVICES="openvswitch neutron-openvswitch-agent"
+else
+  CONTROLLER_NEUTRON_SERVICES="neutron-server neutron-linuxbridge-agent neutron-dhcp-agent neutron-metadata-agent neutron-l3-agent"
+  COMPUTE_NEUTRON_SERVICES="neutron-linuxbridge-agent"
 fi
 
-if [[ $MY_ROLE =~ "compute" ]] ; then
-  COMPUTE_SERVICES="openvswitch libvirtd openstack-nova-compute ksm"
-  NETWORK_SERVICES="openvswitch neutron-openvswitch-agent "
-fi
-
-if [[ $MY_ROLE =~ "network" ]] ; then
-  NETWORK_SERVICES="openvswitch neutron-openvswitch-agent neutron-dhcp-agent neutron-l3-agent neutron-metadata-agent"
-fi
+CONTROLLER_NOVA_SERVICES="openstack-nova-api openstack-nova-consoleauth openstack-nova-scheduler openstack-nova-conductor openstack-nova-novncproxy"
+COMPUTE_NOVA_SERVICES="libvirtd openstack-nova-compute ksm"
