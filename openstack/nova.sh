@@ -38,7 +38,7 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   fi
 
 
-  crudini --set --verbose /etc/nova/nova.conf glance host $CONTROLLER_IP
+# crudini --set --verbose /etc/nova/nova.conf glance host $CONTROLLER_IP
 
   crudini --set --verbose /etc/nova/nova.conf neutron url http://$CONTROLLER_IP:9696
   crudini --set --verbose /etc/nova/nova.conf neutron auth_url http://$CONTROLLER_IP:35357
@@ -73,7 +73,7 @@ if [[ $MY_ROLE =~ "compute" ]] ; then
   # echo 'net.bridge.bridge-nf-call-iptables=1' >> /etc/sysctl.conf
   # echo 'net.bridge.bridge-nf-call-ip6tables=1' >> /etc/sysctl.conf
   sysctl -p
-  crudini --set --verbose /etc/nova/nova.conf glance api_servers = http://$CONTROLLER_IP:9292
+  crudini --set --verbose /etc/nova/nova.conf glance api_servers http://$CONTROLLER_IP:9292
   crudini --set --verbose /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
   systemctl enable --now $COMPUTE_NOVA_SERVICES
 fi

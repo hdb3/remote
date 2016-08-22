@@ -1,9 +1,7 @@
 #!/bin/bash
 # prefilight.sh
-systemctl enable ntpd
-systemctl restart ntpd
-systemctl stop firewalld || :
-systemctl --now disable firewalld NetworkManager || :
+systemctl enable --now ntpd
+systemctl disable --now firewalld NetworkManager || :
 
 if [ -f /etc/selinux/config ]; then
   sed -i 's/enforcing/disabled/g' /etc/selinux/config
@@ -12,18 +10,14 @@ fi
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"
-#install messaging service
-systemctl enable rabbitmq-server
-systemctl restart rabbitmq-server
+systemctl enable --now rabbitmq-server
 
-rabbitmqctl add_user $RABBIT_USER $RABBIT_PASSWORD || echo "not needed"
+rabbitmqctl add_user $RABBIT_USER $RABBIT_PASSWORD || :
 rabbitmqctl set_permissions openstack ".*" ".*" ".*"
 
-systemctl enable memcached
-systemctl restart memcached
+systemctl enable --now memcached
 
-systemctl enable httpd
-systemctl restart httpd
+systemctl enable --now httpd
 
 sed -i -e "/^\!includedir/d" /etc/my.cnf
 sed -i -e "/^#/d" /etc/my.cnf
@@ -42,7 +36,6 @@ systemctl --system daemon-reload
 #wipe the database directory in case this is not the first attempt to install openstack
 systemctl stop mariadb || :
 rm -rf /var/lib/mysql/*
-systemctl enable mariadb
-systemctl restart mariadb
+systemctl enable --now mariadb
 mysqladmin -u root password $DBPASSWD
 fi 

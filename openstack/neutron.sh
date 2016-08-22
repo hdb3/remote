@@ -1,8 +1,11 @@
 
-for f in /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/ml2_conf.ini ; do
+for f in /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/l3_agent.ini /etc/neutron/dhcp_agent.ini /etc/neutron/metadata_agent.ini ; do
   sed -i -e "/^#/d" $f
   sed -i -e "/^$/d" $f
 done
+
+TUNNEL_IP=$(./subnet.py $TUNNEL_SUBNET)
+if [[ $TUNNEL_IP == "ERROR" ]] ; then TUNNEL_IP=$MY_IP ; fi
 
 crudini --set --verbose /etc/neutron/neutron.conf database connection mysql+pymysql://neutron:$DBPASSWD@$CONTROLLER_IP/neutron
 
@@ -13,16 +16,16 @@ crudini --set --verbose /etc/neutron/neutron.conf DEFAULT service_plugins router
 crudini --set --verbose /etc/neutron/neutron.conf DEFAULT allow_overlapping_ips True
 crudini --set --verbose /etc/neutron/neutron.conf DEFAULT notify_nova_on_port_status_changes True
 crudini --set --verbose /etc/neutron/neutron.conf DEFAULT notify_nova_on_port_data_changes True
-crudini --set --verbose /etc/neutron/neutron.conf DEFAULT nova_url  http://$CONTROLLER_IP:8774/v2
+crudini --set --verbose /etc/neutron/neutron.conf DEFAULT nova_url http://$CONTROLLER_IP:8774/v2
 
 crudini --set --verbose /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
 crudini --set --verbose /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_userid $RABBIT_USER
 crudini --set --verbose /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
 
-crudini --set --verbose /etc/neutron/neutron.conf nova auth_url  http://$CONTROLLER_IP:35357
-crudini --set --verbose /etc/neutron/neutron.conf nova auth_plugin password
-crudini --set --verbose /etc/neutron/neutron.conf nova project_domain_id default
-crudini --set --verbose /etc/neutron/neutron.conf nova user_domain_id default
+crudini --set --verbose /etc/neutron/neutron.conf nova auth_url http://$CONTROLLER_IP:35357
+crudini --set --verbose /etc/neutron/neutron.conf nova auth_type password
+crudini --set --verbose /etc/neutron/neutron.conf nova project_domain_name default
+crudini --set --verbose /etc/neutron/neutron.conf nova user_domain_name default
 crudini --set --verbose /etc/neutron/neutron.conf nova region_name RegionOne
 crudini --set --verbose /etc/neutron/neutron.conf nova project_name service
 crudini --set --verbose /etc/neutron/neutron.conf nova username nova
@@ -30,22 +33,25 @@ crudini --set --verbose /etc/neutron/neutron.conf nova password $SERVICE_PWD
 
 crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
 crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken auth_url http://$CONTROLLER_IP:35357
-crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken auth_plugin password
-crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken project_domain_id default
-crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken user_domain_id default
+crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken memcached_servers $CONTROLLER_IP:11211
+crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken auth_type password
+crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken project_domain_name default
+crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken user_domain_name default
 crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken project_name service
 crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken username neutron
 crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken password $SERVICE_PWD
 
-
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running neutron controller node setup"
+
+  crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT nova_metadata_ip $CONTROLLER_IP
+  crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT metadata_proxy_shared_secret $METADATA_SECRET
 
   ln -fs /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugin.ini
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan,vxlan
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vxlan
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers linuxbridge,l2population
-  crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 extension_drivers  port_security
+  crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 extension_drivers port_security
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks provider
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vxlan vni_ranges 1:1000
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
@@ -63,6 +69,9 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
   crudini --set --verbose /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.BridgeInterfaceDriver
   crudini --set --verbose /etc/neutron/dhcp_agent.ini DEFAULT dhcp_driver neutron.agent.linux.dhcp.Dnsmasq
   crudini --set --verbose /etc/neutron/dhcp_agent.ini DEFAULT enable_isolated_metadata True
+
+  brctl addbr br-ex || :
+  brctl addif br-ex $EXTERNAL_PORT || :
 
   source creds
   openstack user create --domain default --password $SERVICE_PWD neutron

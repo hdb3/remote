@@ -25,7 +25,7 @@ fi
 for node in "$@"
 do
     echo "$node (${user}${node})"
-    scp $wd/* ${user}${node}:
+    scp -r $wd/* ${user}${node}:
     scp $wd/do_it.local ${user}${node}:do_it || echo "no local do_it file"
     if [ -d $wd/.ssh ]; then
         scp -r $wd/.ssh ${user}${node}:
