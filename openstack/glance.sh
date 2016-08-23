@@ -6,10 +6,9 @@ openstack user create --domain default --password $SERVICE_PWD glance
 openstack role add --project service --user glance admin
 openstack service create --name glance --description "OpenStack Image service" image
 
-
-+openstack endpoint create --region RegionOne image public http://$CONTROLLER_IP:9292
-+openstack endpoint create --region RegionOne image internal http://$CONTROLLER_IP:9292
-+openstack endpoint create --region RegionOne image admin http://$CONTROLLER_IP:9292
+openstack endpoint create --region RegionOne image public http://$CONTROLLER_IP:9292
+openstack endpoint create --region RegionOne image internal http://$CONTROLLER_IP:9292
+openstack endpoint create --region RegionOne image admin http://$CONTROLLER_IP:9292
 #install glance
 
 crudini --set --verbose /etc/glance/glance-api.conf database connection mysql+pymysql://glance:$DBPASSWD@$CONTROLLER_IP/glance
