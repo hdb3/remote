@@ -30,7 +30,7 @@ crudini --set --verbose /etc/glance/glance-api.conf glance_store stores file,htt
 crudini --set --verbose /etc/glance/glance-api.conf glance_store default_store file
 crudini --set --verbose /etc/glance/glance-api.conf glance_store filesystem_store_datadir /var/lib/glance/images/
 
-crudini --set --verbose /etc/glance/glance-registry.conf database connection mysql://glance:$DBPASSWD@$CONTROLLER_IP/glance
+crudini --set --verbose /etc/glance/glance-registry.conf database connection mysql+pymsql://glance:$DBPASSWD@$CONTROLLER_IP/glance
 crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
 crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken auth_url http://$CONTROLLER_IP:35357
 crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken memcached_servers $CONTROLLER_IP:11211
