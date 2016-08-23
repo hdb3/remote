@@ -26,7 +26,7 @@ openstack user create --domain default --password $ADMIN_PWD admin
 openstack role create admin
 openstack role create user
 openstack role add --project admin --user admin admin
-openstack project create --description "Service Project" service
+openstack project create --domain default --description "Service Project" service
 openstack endpoint create --region RegionOne identity public http://$CONTROLLER_IP:5000/v3
 openstack endpoint create --region RegionOne identity internal http://$CONTROLLER_IP:5000/v3
 openstack endpoint create --region RegionOne identity admin http://$CONTROLLER_IP:35357/v3
