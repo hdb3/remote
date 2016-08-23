@@ -41,6 +41,17 @@ crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken project_nam
 crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken username neutron
 crudini --set --verbose /etc/neutron/neutron.conf keystone_authtoken password $SERVICE_PWD
 
+  crudini --set --verbose  /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
+  crudini --set --verbose  /etc/neutron/l3_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
+  # crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $(./subnet.py $TUNNEL_SUBNET)
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $TUNNEL_IP
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_security_group True
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_ipset True
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
+  # crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini agent tunnel_types gre
+
+
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running neutron controller node setup"
 
@@ -50,11 +61,12 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
   ln -fs /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugin.ini
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan,vxlan
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vxlan
-  crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers linuxbridge,l2population
-  crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 extension_drivers port_security
+  crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch
+  #crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers linuxbridge,l2population
+  #crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2 extension_drivers port_security
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks provider
   crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vxlan vni_ranges 1:1000
-  crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
+  #crudini --set --verbose /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
 
   crudini --set --verbose /etc/neutron/plugins/ml2/linuxbridge_agent.ini linux_bridge physical_interface_mappings provider:$EXTERNAL_PORT
   crudini --set --verbose /etc/neutron/plugins/ml2/linuxbridge_agent.ini vxlan enable_vxlan True
