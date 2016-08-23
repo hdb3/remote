@@ -13,7 +13,7 @@ VIRTMODE=kvm
 # comment out if you don't want horizon on your controller!
 INSTALL_HORIZON=TRUE
 # comment out if the Centos mirror is not available or not wanted....
-LOCALREPO=TRUE
+#LOCALREPO=TRUE
 #only needed for the OPenDaylight installation script
 # hopefully temporarily!
 # comment out if you don't want ODL networking
