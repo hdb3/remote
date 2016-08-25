@@ -41,3 +41,10 @@ echo "export OS_PASSWORD=$ADMIN_PWD" >> creds
 echo "export OS_AUTH_URL=http://$CONTROLLER_IP:35357/v3" >> creds
 echo "export OS_IDENTITY_API_VERSION=3" >> creds
 echo "export OS_IMAGE_API_VERSION=2" >> creds
+source creds
+# it can take a short while before keystone service is available....
+until openstack user list
+do
+  echo "retrying user list..."
+done
+
