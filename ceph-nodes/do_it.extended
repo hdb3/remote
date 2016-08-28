@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+useradd -d /home/centos -m centos 
+echo centos:centos | chpasswd 
+echo 'centos ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+sed -i -e '/requiretty/ d' /etc/sudoers
+sed -i -e '/^PasswordAuthentication/ s/no/yes/' /etc/ssh/sshd_config
+systemctl restart sshd
+yum -y install epel-release
+yum -y install ntp yum-plugin-priorities redhat-lsb-core gdisk lvm2
+yum -y remove NetworkManager # selinux-policy-targeted selinux-policy
+## sudo systemctl disable firewalld ; sudo systemctl stop firewalld
+systemctl --now enable ntpd
+## sudo systemctl start ntpd
+setenforce 0
+sudo sed -i 's/enforcing/disabled/g' /etc/selinux/config
+
+
+which pvs
+which sgdisk
+export RESERVED1="$(findmnt --noheadings --list --fstab --evaluate -o SOURCE|grep -v '^/dev/mapper')"
+export RESERVED2="$(pvs --noheadings -o pv_name)"
+export DISKS="$(lsblk  -l -p -n |grep disk | awk '{print $1}')"
+for d in $DISKS 
+ do
+  if [[ $RESERVED1 =~ $d || $RESERVED2 =~ $d ]] 
+  then
+    : # echo "protecting $d" 
+    pd="$pd $d" 
+  else
+    : # echo "formatting $d" 
+    dd="$dd $d" 
+  fi 
+ done
+ echo "will overwrite $dd"
+ echo "will protect $pd"
+ echo -n "continue?"
+ read n
+ for dev in $dd
+   do
+      echo "formatting $dev"
+      sgdisk -Z $dev
+   done
+ partprobe
+ echo $dd > ceph-disks
+

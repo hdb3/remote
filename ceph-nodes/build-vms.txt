@@ -1,0 +1,29 @@
+for vm in vm1 vm2 vm3 vm4 ceph-client ceph-deploy
+  do
+    virsh destroy $vm || :
+    virsh undefine $vm --nvram --remove-all-storage --snapshots-metadata || :
+    #virsh undefine $vm --nvram --remove-all-storage --delete-snapshots --snapshots-metadata || :
+  done
+
+virt-clone -o centos72-ks -n vm1 --mac 52:54:00:44:b4:f9 --auto-clone
+#virt-clone -o centos72-ks -n vm1 --auto-clone
+for d in vdb vdc vdd
+  do
+    virsh vol-create-as default $d 8G --format qcow2
+    virsh attach-disk vm1 --source /var/lib/libvirt/images/$d $d --driver qemu --subdriver qcow2 --config
+  done 
+#
+#for vm in vm2 vm3 vm4
+#  do
+#    virt-clone -o vm1 -n $vm --auto-clone
+#  done
+virt-clone -o vm1 -n vm2 --mac 52:54:00:62:30:16 --auto-clone
+virt-clone -o vm1 -n vm3 --mac 52:54:00:ca:0d:ba --auto-clone
+virt-clone -o vm1 -n vm4 --mac 52:54:00:d0:c4:ae --auto-clone
+virt-clone -o centos72-ks -n ceph-client --mac 52:54:00:99:dd:ca --auto-clone
+virt-clone -o centos72-ks -n ceph-deploy --mac 52:54:00:08:84:c4 --auto-clone
+
+for vm in vm1 vm2 vm3 vm4 ceph-client ceph-deploy
+  do
+    virsh start $vm
+  done

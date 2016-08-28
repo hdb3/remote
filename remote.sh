@@ -7,6 +7,7 @@ if [ "$#" -lt "2" ]; then
 	exit 1
 fi
 
+
 wd=$1
 shift
 if [ ! -d $wd ]; then
@@ -22,8 +23,16 @@ if [ -f $wd/user ]; then
   user="$user@"
 fi
 
+if [ -f $wd/password ]; then
+  which sshpass > /dev/null
+  password=$(<$wd/password)
+fi
+
 for node in "$@"
 do
+    ssh-keygen -f ~/.ssh/known_hosts -R  ${node}
+    echo "sshpass -p $password ssh-copy-id ${user}${node}"
+    sshpass -p $password ssh-copy-id ${user}${node}
     echo "$node (${user}${node})"
     scp $wd/* ${user}${node}:
     if [ -d $wd/.ssh ]; then
@@ -31,5 +40,3 @@ do
     fi
     ssh -t ${user}${node} sudo bash -ve do_it
 done
-
-
