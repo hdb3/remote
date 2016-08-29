@@ -5,6 +5,8 @@ set +e
 mkdir -p /tmp/install_lock
 
 set -a # this ensures the variables set in the next step are exported to subsequent commands...
+test -f config || exit 1
+test -f roles || exit 1
 source config
 if [ -n "$LOCALREPO" ]
   then
