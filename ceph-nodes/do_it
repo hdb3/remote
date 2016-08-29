@@ -9,7 +9,7 @@ sudo -u centos mkdir  -m 0700 /home/centos/.ssh
 printf "StrictHostKeyChecking No\n" >> /home/centos/.ssh/config
 chmod og-rwx /home/centos/.ssh/config
 systemctl restart sshd
-cp ceph.repo /etc/yum.repos.d
+#cp ceph.repo /etc/yum.repos.d
 printf "[main]\nenabled=0\n" > /etc/yum/pluginconf.d/fastestmirror.conf
 yum -y install ntp yum-plugin-priorities sshpass
 yum -y install epel-release
@@ -17,4 +17,4 @@ yum -y remove NetworkManager # selinux-policy-targeted selinux-policy
 systemctl --now enable ntpd
 setenforce 0
 sudo sed -i 's/enforcing/disabled/g' /etc/selinux/config
-yum -y install ceph-deploy
+#yum -y install ceph-deploy

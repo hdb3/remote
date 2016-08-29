@@ -30,10 +30,9 @@ fi
 
 for node in "$@"
 do
-    ssh-keygen -f ~/.ssh/known_hosts -R  ${node}
-    echo "sshpass -p $password ssh-copy-id ${user}${node}"
-    sshpass -p $password ssh-copy-id ${user}${node}
     echo "$node (${user}${node})"
+    # echo "sshpass -p $password ssh-copy-id ${user}${node}"
+    sshpass -p $password ssh-copy-id ${user}${node}
     scp $wd/* ${user}${node}:
     if [ -d $wd/.ssh ]; then
         scp -r $wd/.ssh ${user}${node}:
