@@ -1,4 +1,5 @@
 #!/bin/bash
+BASEIMAGE="centos72-osbase"
 set -e
 if [[ $EUID -ne 0 ]]; then
    echo "you probably want to run this script as root" 
@@ -10,13 +11,14 @@ for vm in os-controller os-compute1
     virsh undefine $vm --nvram --remove-all-storage --snapshots-metadata || :
   done
 
-virt-clone -o centos72-ks2 -n os-controller --mac 52:54:00:6c:7b:24 --auto-clone
-virsh attach-interface --domain os-controller --mac 52:54:00:2d:d7:95 --type bridge --source br1 --config --persistent
-virsh setmaxmem os-controller 4G --config
-virsh setmem os-controller 4G --config
+virt-clone -o $BASEIMAGE -n os-controller --mac 52:54:00:6c:7b:24 --auto-clone
+#virsh attach-interface --domain os-controller --mac 52:54:00:2d:d7:95 --type bridge --source br1 --config --persistent
+#virsh attach-interface --domain os-controller --mac 52:54:00:64:04:95 --type bridge --source br2 --config --persistent
+#virsh setmaxmem os-controller 4G --config
+#virsh setmem os-controller 4G --config
 
-virt-clone -o centos72-ks2 -n os-compute1 --mac 52:54:00:27:a0:7f --auto-clone
-virsh attach-interface --domain os-compute1 --mac 52:54:00:9e:43:3c --type bridge --source br1 --config --persistent
+virt-clone -o $BASEIMAGE -n os-compute1 --mac 52:54:00:27:a0:7f --auto-clone
+#virsh attach-interface --domain os-compute1 --mac 52:54:00:9e:43:3c --type bridge --source br1 --config --persistent
 virsh setmaxmem os-compute1 8G --config
 virsh setmem os-compute1 8G --config
 virsh setvcpus os-compute1 3 --maximum --config

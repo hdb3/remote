@@ -1,5 +1,6 @@
 # this script builds ALL of the required objects for routed external networking in OpenStack
-NETNAME="net67" EXGW="10.30.65.1" LOCALGW="10.30.65.11" EXNET="10.30.65.0/24" LOCALNET="10.30.67.0/24" DNS="10.30.65.200" OSEXNET="external"
+NETNAME="net19" EXGW="172.19.0.1" LOCALGW="172.19.0.11" EXNET="172.19.0.0/24" LOCALNET="172.20.0.0/24" DNS="172.19.0.1" OSEXNET="external"
+#NETNAME="net67" EXGW="10.30.65.1" LOCALGW="10.30.65.11" EXNET="10.30.65.0/24" LOCALNET="10.30.67.0/24" DNS="10.30.65.200" OSEXNET="external"
 #create the external network
 neutron net-create ext-net --router:external --provider:physical_network $OSEXNET --provider:network_type flat
 neutron subnet-create --name ext-net --disable-dhcp --gateway $EXGW ext-net $EXNET
