@@ -20,7 +20,10 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
   crudini --set --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
   crudini --set --verbose /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
-  # crudini --set --verbose /etc/nova/nova.conf libvirt qemu
+
+  crudini --set --verbose /etc/nova/nova.conf glance api_servers http://$CONTROLLER_IP:9292
+  crudini --set --verbose /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
+
   if [[ "x$VIRTMODE" == "x" ]] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt virt_type kvm
   else
@@ -83,8 +86,6 @@ if [[ $MY_ROLE =~ "compute" ]] ; then
     vgremove -f openstack || :
     vgcreate openstack $LVMDEV
   fi
-  crudini --set --verbose /etc/nova/nova.conf glance api_servers http://$CONTROLLER_IP:9292
-  crudini --set --verbose /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
    #COMPUTE_SERVICES="openvswitch libvirtd openstack-nova-compute"
   systemctl enable $COMPUTE_SERVICES
   systemctl start $COMPUTE_SERVICES

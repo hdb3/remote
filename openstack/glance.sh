@@ -59,4 +59,4 @@ do
   echo "retrying image list..."
 done
 
-openstack image create --public --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --container-format bare "cirros-0.3.3-x86_64"
+openstack image create --public --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --container-format bare "cirros"

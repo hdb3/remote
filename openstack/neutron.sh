@@ -96,6 +96,14 @@ fi
 # the following needed if external networks are needed on compute nodes (and probably also for distributed virtual routers)
 if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   systemctl restart openvswitch
+  if [ -n "$EXTERNAL_PORT" && -n "$VLAN_PORT" ] ; then
+    mappings="external:br-ex,vlan:br-vlan"
+  elif [ -n "$VLAN_PORT" ] ; then
+    mappings="vlan:br-vlan"
+  elif [ -n "$EXTERNAL_PORT" ] ; then
+    mappings="external:br-ex"
+  fi
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings "$mappings"
   set +e
   if [ -n "$EXTERNAL_PORT" ] ; then
     ip link set dev $EXTERNAL_PORT up
@@ -105,10 +113,9 @@ if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   if [ -n "$VLAN_PORT" ] ; then
     ip link set dev $VLAN_PORT up
     ovs-vsctl --may-exist add-br br-vlan
-    ovs-vsctl add-port br-vlan $VLAN_PORT -- set port $VLAN_PORT vlan_mode=trunk
+    ovs-vsctl --may-exist add-port br-vlan $VLAN_PORT -- set port $VLAN_PORT vlan_mode=trunk
   fi
   set -e
-  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings external:br-ex,vlan:br-vlan
   crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT metadata_proxy_shared_secret $META_PWD
   crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT auth_url http://$CONTROLLER_IP:5000/v2.0
   crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT nova_metadata_ip $CONTROLLER_IP
