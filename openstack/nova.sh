@@ -77,6 +77,12 @@ if [[ $MY_ROLE =~ "compute" ]] ; then
   # echo 'net.bridge.bridge-nf-call-iptables=1' >> /etc/sysctl.conf
   # echo 'net.bridge.bridge-nf-call-ip6tables=1' >> /etc/sysctl.conf
   sysctl -p
+  if [ -n "$LVMDEV" ] ; then
+    crudini --set --verbose /etc/nova/nova.conf libvirt images_type lvm
+    crudini --set --verbose /etc/nova/nova.conf libvirt images_volume_group "openstack"
+    vgremove -f openstack || :
+    vgcreate openstack $LVMDEV
+  fi
   crudini --set --verbose /etc/nova/nova.conf glance api_servers http://$CONTROLLER_IP:9292
   crudini --set --verbose /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
    #COMPUTE_SERVICES="openvswitch libvirtd openstack-nova-compute"
