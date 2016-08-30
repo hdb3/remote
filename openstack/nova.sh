@@ -18,6 +18,7 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf vnc novncproxy_base_url http://$CONTROLLER_IP:6080/vnc_auto.html
   crudini --set --verbose /etc/nova/nova.conf DEFAULT network_api_class nova.network.neutronv2.api.API
   crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
+  #crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
   crudini --set --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
   crudini --set --verbose /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 

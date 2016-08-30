@@ -54,7 +54,7 @@ crudini --set --verbose  /etc/neutron/neutron.conf keystone_authtoken password $
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vlan network_vlan_ranges vlan
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_gre tunnel_id_ranges 1:1000
-  crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_security_group False
+  crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_security_group True
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
@@ -79,7 +79,7 @@ if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   crudini --set --verbose  /etc/neutron/l3_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
   # crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $(./subnet.py $TUNNEL_SUBNET)
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $TUNNEL_IP
-  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_security_group False
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_security_group True
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_ipset True
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
   # crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
