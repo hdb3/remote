@@ -4,7 +4,11 @@ for f in /etc/neutron/neutron.conf /etc/neutron/plugins/ml2/ml2_conf.ini ; do
   sed -i -e "/^$/d" $f
 done
 
-TUNNEL_IP=$(./subnet.py $TUNNEL_SUBNET)
+if [ -n "$TUNNEL_SUBNET" ] ; then
+  TUNNEL_IP=$(./subnet.py $TUNNEL_SUBNET)
+else
+  TUNNEL_IP="ERROR"
+fi
 if [[ $TUNNEL_IP == "ERROR" ]] ; then TUNNEL_IP=$MY_IP ; fi
 
 crudini --set --verbose /etc/neutron/neutron.conf database connection mysql+pymysql://neutron:$DBPASSWD@$CONTROLLER_IP/neutron
