@@ -68,6 +68,7 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
   openstack endpoint create --region RegionOne compute public http://$CONTROLLER_IP:8774/v2.1/%\(tenant_id\)s
   openstack endpoint create --region RegionOne compute internal http://$CONTROLLER_IP:8774/v2.1/%\(tenant_id\)s
   openstack endpoint create --region RegionOne compute admin http://$CONTROLLER_IP:8774/v2.1/%\(tenant_id\)s
+  crudini --set --verbose /etc/nova/nova.conf cinder os_region_name RegionOne
   su -s /bin/sh -c "nova-manage api_db sync" nova
   su -s /bin/sh -c "nova-manage db sync" nova
   systemctl enable $CONTROLLER_SERVICES
