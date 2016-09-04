@@ -1,8 +1,6 @@
 #!/bin/bash
 # prefilight.sh
-systemctl enable ntpd
-systemctl restart ntpd
-systemctl stop firewalld || :
+systemctl --now enable ntpd
 systemctl --now disable firewalld NetworkManager || :
 
 if [ -f /etc/selinux/config ]; then
@@ -12,18 +10,19 @@ fi
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"
-#install messaging service
-systemctl enable rabbitmq-server
-systemctl restart rabbitmq-server
 
-rabbitmqctl add_user openstack Service123 || echo "not needed"
-rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+systemctl --now enable memcached httpd rabbitmq-server
 
-systemctl enable memcached
-systemctl restart memcached
+rabbitmqctl add_user $SERVICE_USER $SERVICE_PWD || echo "not needed"
+rabbitmqctl set_permissions $SERVICE_USER ".*" ".*" ".*"
 
-systemctl enable httpd
-systemctl restart httpd
+if [ -d /var/lib/mysql ]; then
+  #wipe the database directory in case this is not the first attempt to install openstack
+  systemctl stop mariadb || :
+  rm -rf /var/lib/mysql/*
+  rm -rf /etc/my.cnf*
+  yum reinstall -y mariadb mariadb-server mariadb-config
+fi
 
 sed -i -e "/^\!includedir/d" /etc/my.cnf
 sed -i -e "/^#/d" /etc/my.cnf
@@ -39,10 +38,14 @@ mkdir -p /etc/systemd/system/mariadb.service.d
 crudini --set --verbose /etc/systemd/system/mariadb.service.d/limits.conf Service LimitNOFILE 10000
 systemctl --system daemon-reload
 
-#wipe the database directory in case this is not the first attempt to install openstack
-systemctl stop mariadb || :
-rm -rf /var/lib/mysql/*
-systemctl enable mariadb
-systemctl restart mariadb
+systemctl --now enable mariadb
 mysqladmin -u root password $DBPASSWD
-fi 
+fi  # end controller only section
+
+# create an lvm VG wherever one is needed....
+if [ -n "$LVMDEV" ] ; then
+  set +e
+  vgremove -f $OS_VOL_GROUP || :
+  vgcreate $OS_VOL_GROUP $LVMDEV
+  set -e
+fi

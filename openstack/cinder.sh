@@ -25,16 +25,13 @@ crudini --set --verbose /etc/cinder/cinder.conf keystone_authtoken username cind
 crudini --set --verbose /etc/cinder/cinder.conf keystone_authtoken password $SERVICE_PWD
 
 crudini --set --verbose /etc/cinder/cinder.conf lvm volume_driver cinder.volume.drivers.lvm.LVMVolumeDriver
-crudini --set --verbose /etc/cinder/cinder.conf lvm volume_group openstack
+crudini --set --verbose /etc/cinder/cinder.conf lvm volume_group $OS_VOL_GROUP
 crudini --set --verbose /etc/cinder/cinder.conf lvm iscsi_protocol iscsi
 crudini --set --verbose /etc/cinder/cinder.conf lvm iscsi_helper lioadm
 crudini --set --verbose /etc/cinder/cinder.conf DEFAULT enabled_backends lvm
 crudini --set --verbose /etc/cinder/cinder.conf DEFAULT glance_api_servers http://$CONTROLLER_IP:9292
 crudini --set --verbose /etc/cinder/cinder.conf oslo_concurrency lock_path /var/lib/cinder/tmp
 
-su -s /bin/sh -c "cinder-manage db sync" cinder
-systemctl enable openstack-cinder-api openstack-cinder-scheduler
-systemctl start openstack-cinder-api openstack-cinder-scheduler
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running cinder node setup"
@@ -52,5 +49,9 @@ if [[ $MY_ROLE =~ "controller" ]] ; then
   openstack endpoint create --region RegionOne volumev2 admin http://$CONTROLLER_IP:8776/v2/%\(tenant_id\)s
 
   su -s /bin/sh -c "cinder-manage db sync" cinder
+  systemctl --now enable openstack-cinder-api openstack-cinder-scheduler openstack-cinder-volume
+
+  # openstack volume create --size 1 testvol
+  # openstack volume delete testvol
 fi
 

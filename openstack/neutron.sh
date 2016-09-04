@@ -100,11 +100,11 @@ fi
 # the following needed if external networks are needed on compute nodes (and probably also for distributed virtual routers)
 if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   systemctl restart openvswitch
-  if [ -n "$EXTERNAL_PORT" && -n "$VLAN_PORT" ] ; then
+  if [[ -n "$EXTERNAL_PORT" && -n "$VLAN_PORT" ]] ; then
     mappings="external:br-ex,vlan:br-vlan"
-  elif [ -n "$VLAN_PORT" ] ; then
+  elif [[ -n "$VLAN_PORT" ]] ; then
     mappings="vlan:br-vlan"
-  elif [ -n "$EXTERNAL_PORT" ] ; then
+  elif [[ -n "$EXTERNAL_PORT" ]] ; then
     mappings="external:br-ex"
   fi
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings "$mappings"
