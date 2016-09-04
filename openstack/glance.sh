@@ -11,35 +11,34 @@ openstack endpoint create --region RegionOne image internal http://$CONTROLLER_I
 openstack endpoint create --region RegionOne image admin http://$CONTROLLER_IP:9292
 
 #install glance
+for inifile in /etc/glance/glance-api.conf /etc/glance/glance-registry.conf
+  do
+    crudini --set --verbose $inifile database connection mysql+pymysql://glance:$DBPASSWD@$CONTROLLER_IP/glance
+    crudini --set --verbose $inifile keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
+    crudini --set --verbose $inifile keystone_authtoken auth_url http://$CONTROLLER_IP:35357
+    crudini --set --verbose $inifile keystone_authtoken memcached_servers $CONTROLLER_IP:11211
+    crudini --set --verbose $inifile keystone_authtoken auth_type password
+    crudini --set --verbose $inifile keystone_authtoken project_domain_name default
+    crudini --set --verbose $inifile keystone_authtoken user_domain_name default
+    crudini --set --verbose $inifile keystone_authtoken project_name service
+    crudini --set --verbose $inifile keystone_authtoken username glance
+    crudini --set --verbose $inifile keystone_authtoken password $SERVICE_PWD
+    crudini --set --verbose $inifile paste_deploy flavor keystone
 
-crudini --set --verbose /etc/glance/glance-api.conf database connection mysql+pymysql://glance:$DBPASSWD@$CONTROLLER_IP/glance
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken auth_url http://$CONTROLLER_IP:35357
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken memcached_servers $CONTROLLER_IP:11211
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken auth_type password
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken project_domain_name default
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken user_domain_name default
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken project_name service
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken username glance
-crudini --set --verbose /etc/glance/glance-api.conf keystone_authtoken password $SERVICE_PWD
-crudini --set --verbose /etc/glance/glance-api.conf paste_deploy flavor keystone
-
-crudini --set --verbose /etc/glance/glance-api.conf glance_store stores file,http
-crudini --set --verbose /etc/glance/glance-api.conf glance_store default_store file
-crudini --set --verbose /etc/glance/glance-api.conf glance_store filesystem_store_datadir /var/lib/glance/images/
-
-crudini --set --verbose /etc/glance/glance-registry.conf database connection mysql+pymysql://glance:$DBPASSWD@$CONTROLLER_IP/glance
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken auth_url http://$CONTROLLER_IP:35357
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken memcached_servers $CONTROLLER_IP:11211
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken auth_type password
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken project_domain_name default
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken user_domain_name default
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken project_name service
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken username glance
-crudini --set --verbose /etc/glance/glance-registry.conf keystone_authtoken password $SERVICE_PWD
-
-crudini --set --verbose /etc/glance/glance-registry.conf paste_deploy flavor keystone
+    if [ -n "$LVMDEV" && "${GLANCEUSES^^}" =~ "CINDER" ] ; then
+      crudini --set --verbose $inifile glance_store stores cinder,http
+      crudini --set --verbose $inifile glance_store default_store cinder
+      crudini --set --verbose $inifile glance_store cinder_os_region_name default
+      crudini --set --verbose $inifile glance_store cinder_api_insecure True
+      crudini --set --verbose $inifile glance_store cinder_store_user_name cinder
+      crudini --set --verbose $inifile glance_store cinder_store_password cinder
+      crudini --set --verbose $inifile glance_store cinder_store_project_name cinder
+    else
+      crudini --set --verbose $inifile glance_store stores file,http
+      crudini --set --verbose $inifile glance_store default_store file
+      # crudini --set --verbose $inifile glance_store filesystem_store_datadir /var/lib/glance/images/
+    fi
+  done
 
 #start glance
 su -s /bin/sh -c "glance-manage db_sync" glance

@@ -8,7 +8,6 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf api_database connection mysql+pymysql://nova:$DBPASSWD@$CONTROLLER_IP/nova_api
   crudini --set --verbose /etc/nova/nova.conf database connection mysql+pymysql://nova:$DBPASSWD@$CONTROLLER_IP/nova
 
-
   crudini --set --verbose /etc/nova/nova.conf DEFAULT use_neutron True
   crudini --set --verbose /etc/nova/nova.conf DEFAULT rpc_backend rabbit
   crudini --set --verbose /etc/nova/nova.conf DEFAULT auth_strategy keystone
@@ -18,21 +17,20 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf vnc novncproxy_base_url http://$CONTROLLER_IP:6080/vnc_auto.html
   crudini --set --verbose /etc/nova/nova.conf DEFAULT network_api_class nova.network.neutronv2.api.API
   crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
-  #crudini --set --verbose /etc/nova/nova.conf DEFAULT security_group_api neutron
   crudini --set --verbose /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
   crudini --set --verbose /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 
   crudini --set --verbose /etc/nova/nova.conf glance api_servers http://$CONTROLLER_IP:9292
   crudini --set --verbose /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
 
-  if [[ "x$VIRTMODE" == "x" ]] ; then
+  if [[ -z "$VIRTMODE" ]] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt virt_type kvm
   else
     crudini --set --verbose /etc/nova/nova.conf libvirt virt_type $VIRTMODE
   fi
 
   crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_IP
-  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid openstack
+  crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid openstack # really should make 'openstack' a variable like $RABBIT_USERID
   crudini --set --verbose /etc/nova/nova.conf oslo_messaging_rabbit rabbit_password $SERVICE_PWD
 
   crudini --set --verbose /etc/nova/nova.conf keystone_authtoken auth_uri http://$CONTROLLER_IP:5000
@@ -84,9 +82,10 @@ if [[ $MY_ROLE =~ "compute" ]] ; then
   sysctl -p
   if [ -n "$LVMDEV" ] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt images_type lvm
-    crudini --set --verbose /etc/nova/nova.conf libvirt images_volume_group "openstack"
-    vgremove -f openstack || :
-    vgcreate openstack $LVMDEV
+    crudini --set --verbose /etc/nova/nova.conf libvirt images_volume_group "$OS_VOL_GROUP"
+    # move VG createion earlier so that cinder can use it too...
+    #vgremove -f openstack || :
+    #vgcreate openstack $LVMDEV
   fi
    #COMPUTE_SERVICES="openvswitch libvirtd openstack-nova-compute"
   systemctl enable $COMPUTE_SERVICES

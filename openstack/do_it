@@ -1,9 +1,13 @@
 #!/bin/bash
 {
-echo "centos:centos" | sudo chpasswd
-set +e
+#echo "centos:centos" | sudo chpasswd
+mkdir log || :
+yum list installed > log/packages-init
+env > log/env-init
+set -e
+set +vx # xtrace/verbose off
+set -vx # xtrace/verbose on
 mkdir -p /tmp/install_lock
-
 set -a # this ensures the variables set in the next step are exported to subsequent commands...
 test -f config || exit 1
 test -f roles || exit 1
@@ -15,11 +19,20 @@ if [ -n "$LOCALREPO" ]
   else
     sudo yum -q  -y install epel-release deltarpm
 fi
+# these packages are needed on ALL openstack nodes, for installation, operation or testing
+# yum -y install yum-plugin-priorities
+yum -y install epel-release yum-plugin-priorities centos-release-openstack-mitaka
+yum -y upgrade
+yum -y install python-netifaces python-ipaddress python2-colorama patch crudini # installer
+yum -y install wireshark nmap fping # diagnostics
+yum -y install ntp python-openstackclient mariadb MySQL-python
 # the following code is specific to RHEL/Centos based systems which need to use DHCP to acquire addresess on secondary network interfaces,
 # and where those interfaces have the canonical names 'eth0', 'eth1, 'eth2', etc
 # this is typically only the case for  virtualised (nested test envioronments).
 # a more generic solution should attempt to discover physical interfaces which do not have corresponding persistent configuration files
 # and then build configuration files based on both the interface name/physical address and also the ditsribution class
+
+if [ -n "$PROBE_INTERFACES" ] ; then
 grep DEFROUTE /etc/sysconfig/network-scripts/ifcfg-eth0 || echo "DEFROUTE=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth0
 for intf in eth1 eth2
 do
@@ -54,8 +67,8 @@ ifdown eth0 ; ifup eth0
 set -e
  # need to know how many interfaces are really needed - aimed at virtualised hosts really...
 # this is so that subsequent subnet probes find assigned IP addresses
-sudo yum -q  -y install python-netifaces python-pip # python-ipaddress python-colorama # colorama and ipaddress not available in Centos7 epel?
-sudo pip install py2-ipaddress colorama # not needed if the RPMs have the packages...
+fi
+
 $(./role.py)
 if [[ $OPENSTACK_INSTALL == "yes" ]] ; then
   echo "Local configuration detected and valid role found"
@@ -65,23 +78,31 @@ else
   echo -e "Will abort installation\e[0m"
   exit
 fi
-if [ -n "$CALICO" ]; then sudo -E bash -ev calico-package.sh ; fi
-sudo -E bash -ev package.sh
 source services
-sudo systemctl stop $NETWORK_SERVICES $COMPUTE_SERVICES $CONTROLLER_SERVICES
-sudo -E bash -ev preflight.sh
+sudo systemctl stop $NETWORK_SERVICES $COMPUTE_SERVICES $CONTROLLER_SERVICES || :
+for project in keystone glance cinder nova neutron
+do
+  rm -rf /var/log/$project
+  rm -rf /etc/$project
+done
+sudo -E bash -evx package.sh
+if [ -n "$CALICO" ]; then sudo -E bash -evx calico-package.sh ; fi
+yum list installed > log/packages-final
+env > log/env-final
+set -vx # xtrace
+sudo -E bash -evx preflight.sh
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"
-  sudo -E bash -ev mysql.sh
-  sudo -E bash -ev keystone.sh
-  sudo -E bash -ev glance.sh
-  sudo -E bash -ev cinder.sh
-  if [ -n "$INSTALL_HORIZON" ]; then sudo -E bash -ev horizon.sh ; fi
+  sudo -E bash -evx mysql.sh
+  sudo -E bash -evx keystone.sh
+  sudo -E bash -evx cinder.sh
+  sudo -E bash -evx glance.sh
+  if [ -n "$INSTALL_HORIZON" ]; then sudo -E bash -evx horizon.sh ; fi
 fi
-sudo -E bash -ev nova.sh
-sudo -E bash -ev neutron.sh
-if [ -n "$ODL_IP" ]; then bash -ev odl.sh ; elif
-   [ -n "$CALICO" ]; then sudo -E bash -ev calico.sh ; fi
+sudo -E bash -evx nova.sh
+sudo -E bash -evx neutron.sh
+if [ -n "$ODL_IP" ]; then bash -evx odl.sh ; elif
+   [ -n "$CALICO" ]; then sudo -E bash -evx calico.sh ; fi
 }
 rmdir /tmp/install_lock
 echo "all complete... :-)"
