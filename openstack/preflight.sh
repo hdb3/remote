@@ -45,7 +45,8 @@ fi  # end controller only section
 # create an lvm VG wherever one is needed....
 if [ -n "$LVMDEV" ] ; then
   set +e
-  vgremove -f $OS_VOL_GROUP || :
-  vgcreate $OS_VOL_GROUP $LVMDEV
+  umount $LVMDEV # sometimes the VM wants to mount the ephemeral disks at boot time....!?
+  vgremove -f $OS_VOL_GROUP
   set -e
+  vgcreate -f $OS_VOL_GROUP $LVMDEV
 fi
