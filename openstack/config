@@ -5,6 +5,9 @@ SERVICE_USER=openstack
 ADMIN_PWD=admin
 META_PWD=meta
 DBPASSWD=root
+TUNNEL_SUBNET=172.16.0.0/24
+# comment out if you don't need to try to dynamically find multiple interfaces for tunnels etc...
+PROBE_INTERFACES=TRUE
 EXTERNAL_PORT=eth2
 LVMDEV="/dev/vdb"
 OS_VOL_GROUP=vg-openstack
@@ -14,11 +17,9 @@ VIRTMODE=kvm
 # comment out if you don't want horizon on your controller!
 INSTALL_HORIZON=TRUE
 # comment out if the Centos mirror is not available or not wanted....
-#LOCALREPO=TRUE
+LOCALREPO=TRUE
 # support for alternative backends for Cinder
 #GLANCEUSES=CINDER
-# comment out if you don't need to try to dynamically find multiple interfaces for tunnels etc...
-#PROBE_INTERFACES=TRUE
 #only needed for the OPenDaylight installation script
 # hopefully temporarily!
 # comment out if you don't want ODL networking
