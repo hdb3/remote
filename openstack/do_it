@@ -21,6 +21,7 @@ if [ -n "$LOCALREPO" ]
 fi
 # these packages are needed on ALL openstack nodes, for installation, operation or testing
 # yum -y install yum-plugin-priorities
+yum -y remove microcode_ctl
 yum -y install epel-release yum-plugin-priorities centos-release-openstack-mitaka
 yum -y upgrade
 yum -y install python-netifaces python-ipaddress python2-colorama patch crudini # installer
