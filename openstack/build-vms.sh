@@ -1,11 +1,12 @@
 #!/bin/bash
 BASEIMAGE="centos72-osbase"
+DEFAULT_VMS="os-controller os-compute1 os-compute2"
 set -e
-VMS="os-controller os-compute1 os-compute2"
 declare -A SPEC
 SPEC["os-compute1"]="52:54:00:27:a0:7f 4G 3 100G"
 SPEC["os-compute2"]="52:54:00:b0:c0:9a 4G 3 100G"
 SPEC["os-controller"]="52:54:00:6c:7b:24 2G 2 100G"
+SPEC["os-allinone"]="52:54:00:7b:a4:c8 8G 4 100G"
 
 function add_disk () {
   virsh vol-create-as default ${1}-${2} ${3} --format qcow2
@@ -52,6 +53,17 @@ function ccheck () {
 if [[ $EUID -ne 0 ]]; then
    echo "you probably want to run this script as root" 
    exit 1
+fi
+
+if [[ $# -ne 0 ]] ; then
+   VMS="$@"
+   for vm in $DEFAULT_VMS
+     do
+       destroy $vm
+     done
+else
+   VMS="os-controller os-compute1 os-compute2"
+   echo "building default VMs ($VMS)"
 fi
 
 for vm in $VMS
