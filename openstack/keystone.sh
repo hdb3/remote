@@ -33,7 +33,7 @@ openstack endpoint create --region RegionOne identity admin http://$CONTROLLER_I
 unset OS_TOKEN OS_URL
 
 #create credentials file
-echo "export OS_PROJECT_DOMAIN_NAME=default" >> creds
+echo "export OS_PROJECT_DOMAIN_NAME=default" > creds
 echo "export OS_USER_DOMAIN_NAME=default" >> creds
 echo "export OS_PROJECT_NAME=admin" >> creds
 echo "export OS_USERNAME=admin" >> creds
