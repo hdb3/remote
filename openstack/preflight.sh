@@ -5,13 +5,23 @@ systemctl --now disable firewalld NetworkManager || :
 
 if [ -f /etc/selinux/config ]; then
   sed -i 's/enforcing/disabled/g' /etc/selinux/config
-  echo 0 > /sys/fs/selinux/enforce
+  echo 0 > /sys/fs/selinux/enforce || :
 fi
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"
 
-systemctl --now enable memcached httpd rabbitmq-server
+systemctl --now enable memcached httpd
+
+if [ -d /etc/rabbitmq ]; then
+  #reinstall rabbit carefully in case this is not the first attempt to install openstack
+  systemctl stop rabbitmq-server || :
+  rm -rf /etc/rabbitmq
+  yum reinstall -y rabbitmq-server
+fi
+# systemctl enable --now does not work if this is a reinstall... ;-)
+systemctl enable rabbitmq-server
+systemctl start rabbitmq-server
 
 rabbitmqctl add_user $SERVICE_USER $SERVICE_PWD || echo "not needed"
 rabbitmqctl set_permissions $SERVICE_USER ".*" ".*" ".*"
@@ -38,7 +48,9 @@ mkdir -p /etc/systemd/system/mariadb.service.d
 crudini --set --verbose /etc/systemd/system/mariadb.service.d/limits.conf Service LimitNOFILE 10000
 systemctl --system daemon-reload
 
-systemctl --now enable mariadb
+# systemctl enable --now does not work if this is a reinstall... ;-)
+systemctl enable mariadb
+systemctl start mariadb
 mysqladmin -u root password $DBPASSWD
 fi  # end controller only section
 

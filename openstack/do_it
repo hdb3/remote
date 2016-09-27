@@ -12,6 +12,10 @@ set -a # this ensures the variables set in the next step are exported to subsequ
 test -f config || exit 1
 test -f roles || exit 1
 source config
+if [ -n "$http_proxy" ]
+  then
+    grep "proxy=" /etc/yum.conf || sed -i "/^\[main\]/a proxy=$http_proxy" /etc/yum.conf
+fi
 if [ -n "$LOCALREPO" ]
   then
     sudo rm -rf /etc/yum.repos.d/*
@@ -21,7 +25,10 @@ if [ -n "$LOCALREPO" ]
 fi
 # these packages are needed on ALL openstack nodes, for installation, operation or testing
 # yum -y install yum-plugin-priorities
+if [ -n "$VIRTUAL_HOST" ]
+  then
 yum -y remove microcode_ctl
+fi
 yum -y install epel-release yum-plugin-priorities centos-release-openstack-mitaka
 yum -y upgrade
 yum -y install python-netifaces python-ipaddress python2-colorama patch crudini # installer
@@ -86,6 +93,7 @@ do
   rm -rf /var/log/$project
   rm -rf /etc/$project
 done
+rm -rf /usr/share/openstack-dashboard /etc/openstack-dashboard/
 sudo -E bash -evx package.sh
 if [ -n "$CALICO" ]; then sudo -E bash -evx calico-package.sh ; fi
 yum list installed > log/packages-final

@@ -4,5 +4,6 @@ set +e
 setsebool -P httpd_can_network_connect on
 set -e
 chown -R apache:apache /usr/share/openstack-dashboard/static
-systemctl enable httpd memcached
-systemctl start httpd memcached
+#systemctl enable httpd memcached
+#systemctl start httpd memcached
+systemctl restart httpd memcached
