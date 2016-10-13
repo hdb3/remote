@@ -41,7 +41,7 @@ do
     echo "done"
     echo -n "checking ssh access...."
     if [ -n "$password" ] ; then
-      sshpass -p $password ssh-copy-id -o ConnectionAttempts=100 -o ConnectTimeout=1 $target
+      sshpass -p $password ssh-copy-id -o ControlPath=none -o ConnectionAttempts=100 -o ConnectTimeout=1 $target
     else
       ssh -q -o ConnectionAttempts=100 -o ConnectTimeout=1 $target pwd > /dev/null
     fi

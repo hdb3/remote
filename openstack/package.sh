@@ -6,7 +6,7 @@
 #PACKAGES="python-openstackclient mariadb MySQL-python"
 if [[ $MY_ROLE =~ "controller" ]]
 then
-  PACKAGES="$PACKAGES mod_wsgi openstack-nova-api openstack-nova-cert openstack-nova-conductor openstack-nova-console openstack-nova-novncproxy openstack-nova-scheduler python-novaclient wget openstack-glance python-glance python-glanceclient openstack-keystone httpd memcached python-memcached rabbitmq-server mariadb-server openstack-neutron openstack-neutron-ml2 python-neutronclient openstack-cinder python-cinderclient python-oslo-db targetcli"
+  PACKAGES="$PACKAGES mod_wsgi openstack-nova-api openstack-nova-cert openstack-nova-conductor openstack-nova-console openstack-nova-novncproxy openstack-nova-scheduler python-novaclient wget openstack-glance python-glance python-glanceclient openstack-keystone httpd memcached python-memcached rabbitmq-server openstack-neutron openstack-neutron-ml2 python-neutronclient openstack-cinder python-cinderclient python-oslo-db targetcli"
   if [ -n "$INSTALL_HORIZON" ]
   then
     PACKAGES="$PACKAGES openstack-dashboard"

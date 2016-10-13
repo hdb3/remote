@@ -29,9 +29,11 @@ rabbitmqctl set_permissions $SERVICE_USER ".*" ".*" ".*"
 if [ -d /var/lib/mysql ]; then
   #wipe the database directory in case this is not the first attempt to install openstack
   systemctl stop mariadb || :
-  rm -rf /var/lib/mysql/*
+  rm -rf /var/lib/mysql
   rm -rf /etc/my.cnf*
-  yum reinstall -y mariadb mariadb-server mariadb-config
+  yum reinstall -y mariadb-server mariadb-config
+else
+  yum install -y mariadb-server mariadb-config
 fi
 
 sed -i -e "/^\!includedir/d" /etc/my.cnf
@@ -44,11 +46,13 @@ crudini --set --verbose /etc/my.cnf mysqld collation-server utf8_general_ci
 crudini --set --verbose /etc/my.cnf mysqld init-connect "'SET NAMES utf8'"
 crudini --set --verbose /etc/my.cnf mysqld character-set-server utf8
 crudini --set --verbose /etc/my.cnf mysqld max_connections 25000
+#crudini --set --verbose /etc/my.cnf mysqld log-error /var/log/mysql.log
 mkdir -p /etc/systemd/system/mariadb.service.d
 crudini --set --verbose /etc/systemd/system/mariadb.service.d/limits.conf Service LimitNOFILE 10000
 systemctl --system daemon-reload
 
 # systemctl enable --now does not work if this is a reinstall... ;-)
+/usr/bin/mysql_install_db --rpm --datadir=/var/lib/mysql --user=mysql
 systemctl enable mariadb
 systemctl start mariadb
 mysqladmin -u root password $DBPASSWD
