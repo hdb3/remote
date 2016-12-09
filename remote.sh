@@ -1,4 +1,4 @@
-#!/bin/bash -evx
+#!/bin/bash -ex
 
 #check early for non-standard utilities...
 which fping > /dev/null
@@ -50,5 +50,5 @@ do
     if [ -d $wd/.ssh ]; then
         scp -r $wd/.ssh $target:
     fi
-    ssh -t ${target} sudo bash -ve do_it
+    ssh -t ${target} sudo bash -xe do_it
 done

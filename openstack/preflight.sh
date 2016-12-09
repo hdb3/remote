@@ -59,14 +59,21 @@ mysqladmin -u root password $DBPASSWD
 fi  # end controller only section
 
 # create an lvm VG wherever one is needed....
-if [ -n "$LVMDEV" ] ; then
+if [[ -n "$LVMDEV" ]] ; then
   set +e
+  if [[ ! -n "$OS_VOL_GROUP" ]] ; then
+    export OS_VOL_GROUP=vg-openstack
+  fi
   umount $LVMDEV # sometimes the VM wants to mount the ephemeral disks at boot time....!?
   vgremove -f $OS_VOL_GROUP
   set -e
   vgcreate -f $OS_VOL_GROUP $LVMDEV
-  # the below needed to fix an obscure issue with initialisizing LVs in the OS test environment
-  # however, it should always work and is a really good check that the LVM subsystem is present and correct...
+  set +e
+fi
+
+if [[ -n "$OS_VOL_GROUP" ]] ; then
+  # this needed to fix an obscure issue with initialisizing LVs in the OS test environment
+  # however, it should always work and is a really good check that the LVM subsystem configured VG is present and correct...
   lvcreate -Zn -n canary $OS_VOL_GROUP -L 1G
   lvremove  -f $OS_VOL_GROUP/canary 
 fi

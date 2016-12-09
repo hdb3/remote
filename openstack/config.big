@@ -1,13 +1,14 @@
 #stack information
-ADMIN_TOKEN=ADMIN123
-SERVICE_PWD=Service123
+ADMIN_TOKEN=ad614eae-7fdc-11e6-bfc9-e3651c0b9f54
+SERVICE_PWD=service
+SERVICE_USER=openstack
 ADMIN_PWD=admin
 META_PWD=meta
 DBPASSWD=root
 TUNNEL_SUBNET=192.168.0.0/24
-EXTERNAL_PORT=p3p1
-VLAN_PORT=p3p2
-LVMDEV="/dev/sda"
+EXTERNAL_PORT=em2
+#VLAN_PORT=p3p2
+OS_VOL_GROUP=centos_big
 # kvm is the preferred choice but in some cases it may not be available in your hypervisor hosts.....
 #VIRTMODE=qemu
 VIRTMODE=kvm
@@ -21,3 +22,5 @@ LOCALREPO=TRUE
 # ODL_IP=192.168.50.20
 #CALICO=TRUE
 OSRELEASE=mitaka
+INTNET=10.30.64.0/24 INTNAME=net64 INTGW=10.30.65.12
+DNS=10.30.65.200 GW=10.30.65.1 NET=10.30.65.0/24

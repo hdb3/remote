@@ -80,7 +80,7 @@ if [[ $MY_ROLE =~ "compute" ]] ; then
   # echo 'net.bridge.bridge-nf-call-iptables=1' >> /etc/sysctl.conf
   # echo 'net.bridge.bridge-nf-call-ip6tables=1' >> /etc/sysctl.conf
   sysctl -p
-  if [ -n "$LVMDEV" ] ; then
+  if [ -n "$OS_VOL_GROUP" ] ; then
     crudini --set --verbose /etc/nova/nova.conf libvirt images_type lvm
     crudini --set --verbose /etc/nova/nova.conf libvirt images_volume_group "$OS_VOL_GROUP"
     # move VG createion earlier so that cinder can use it too...

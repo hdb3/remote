@@ -20,6 +20,6 @@ if [[ $MY_ROLE =~ "network" ]]
 then
   PACKAGES="$PACKAGES openstack-neutron openstack-neutron-ml2 openstack-neutron-openvswitch"
 fi
-yum -y remove NetworkManager
+yum -y remove NetworkManager || :
 yum -y repo-pkgs centos-openstack-mitaka reinstall
 yum -y install $PACKAGES
