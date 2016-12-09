@@ -54,7 +54,7 @@ crudini --set --verbose  /etc/neutron/neutron.conf keystone_authtoken password $
   ln -fs /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugin.ini
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan,gre,vxlan
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types gre
-  crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks external
+  crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks $EXTERNAL_PORT
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vlan network_vlan_ranges vlan
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_gre tunnel_id_ranges 1:1000
@@ -81,8 +81,11 @@ if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   echo "running neutron compute/network node setup"
   crudini --set --verbose  /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
   crudini --set --verbose  /etc/neutron/l3_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
+  crudini --set --verbose  /etc/neutron/l3_agent.ini DEFAULT gateway_external_network_id
+  crudini --set --verbose  /etc/neutron/l3_agent.ini DEFAULT external_network_bridge
   # crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $(./subnet.py $TUNNEL_SUBNET)
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $TUNNEL_IP
+  crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs ovsdb_interface native
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_security_group True
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup enable_ipset True
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
@@ -98,26 +101,30 @@ fi
 
 # if [[ $MY_ROLE =~ "network" ]] ; then
 # the following needed if external networks are needed on compute nodes (and probably also for distributed virtual routers)
+EXTERNAL_BRIDGE=br-${EXTERNAL_PORT}
+VLAN_BRIDGE=br-${VLAN_PORT}
 if [[ $MY_ROLE =~ "compute" || $MY_ROLE =~ "network" ]] ; then
   systemctl restart openvswitch
   if [[ -n "$EXTERNAL_PORT" && -n "$VLAN_PORT" ]] ; then
-    mappings="external:br-ex,vlan:br-vlan"
+    mappings="${EXTERNAL_PORT}:${EXTERNAL_BRIDGE},vlan:${VLAN_BRIDGE}"
   elif [[ -n "$VLAN_PORT" ]] ; then
-    mappings="vlan:br-vlan"
+    mappings="vlan:${VLAN_BRIDGE}"
   elif [[ -n "$EXTERNAL_PORT" ]] ; then
-    mappings="external:br-ex"
+    mappings="${EXTERNAL_PORT}:${EXTERNAL_BRIDGE}"
   fi
   crudini --set --verbose  /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings "$mappings"
   set +e
   if [ -n "$EXTERNAL_PORT" ] ; then
     ip link set dev $EXTERNAL_PORT up
-    ovs-vsctl --may-exist add-br br-ex
-    ovs-vsctl --may-exist add-port br-ex $EXTERNAL_PORT
+    ovs-vsctl --may-exist add-br ${EXTERNAL_BRIDGE}
+    ovs-vsctl --may-exist add-port ${EXTERNAL_BRIDGE} $EXTERNAL_PORT
+    ip link set dev $EXTERNAL_BRIDGE up
   fi
   if [ -n "$VLAN_PORT" ] ; then
     ip link set dev $VLAN_PORT up
-    ovs-vsctl --may-exist add-br br-vlan
-    ovs-vsctl --may-exist add-port br-vlan $VLAN_PORT -- set port $VLAN_PORT vlan_mode=trunk
+    ovs-vsctl --may-exist add-br ${VLAN_BRIDGE}
+    ovs-vsctl --may-exist add-port ${VLAN_BRIDGE} $VLAN_PORT -- set port $VLAN_PORT vlan_mode=trunk
+    ip link set dev $VLAN_BRIDGE up
   fi
   set -e
   crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT metadata_proxy_shared_secret $META_PWD

@@ -8,7 +8,6 @@ if [ "$#" -lt "2" ]; then remote_root_passwd="root" ; else remote_root_passwd="$
 if [ "$#" -lt "3" ]; then user="centos" ; else user="$3" ; fi
 if [ "$#" -lt "4" ]; then remote_root_user="root" ; else remote_root_user="$4" ; fi
 echo "setting up user:$user on host:$1 using remote root credentials $remote_root_user:$remote_root_passwd"
-
 password_hash=`openssl passwd $user`
 sshpass -p $remote_root_passwd ssh ${remote_root_user}@${1} useradd -p ${password_hash} -m $user
 sshpass -p $remote_root_passwd ssh ${remote_root_user}@${1} "echo '$user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
