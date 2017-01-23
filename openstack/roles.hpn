@@ -1,6 +1,5 @@
-172.18.1.112 controller
-172.18.1.112 network
-172.18.1.112 compute
-172.18.1.111 compute
-172.18.1.110 compute
-172.18.1.100 compute
+hpn6 controller
+hpn6 network
+hpn5 compute
+hpn6 compute
+hpn7 compute
