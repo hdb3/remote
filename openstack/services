@@ -1,6 +1,6 @@
 
 if [[ $MY_ROLE =~ "controller" ]] ; then
-  CONTROLLER_SERVICES="openstack-nova-api openstack-nova-cert openstack-nova-consoleauth openstack-nova-scheduler openstack-nova-conductor openstack-nova-novncproxy"
+  CONTROLLER_SERVICES="openstack-nova-api openstack-nova-cert openstack-nova-consoleauth openstack-nova-scheduler openstack-nova-conductor openstack-nova-novncproxy openstack-cinder-api openstack-cinder-scheduler openstack-cinder-volume openstack-glance-api openstack-glance-registry"
 fi
 
 if [[ $MY_ROLE =~ "compute" ]] ; then
