@@ -1,5 +1,6 @@
 #!/bin/bash
 # prefilight.sh
+
 systemctl --now enable ntpd
 systemctl --now disable firewalld NetworkManager || :
 
@@ -11,6 +12,8 @@ fi
 if [[ $MY_ROLE =~ "controller" ]] ; then
   echo "running controller node setup"
 
+# this kludge is to enable memcached to run on a system without IPv6 enabled
+sed  -i -e '/OPTIONS/cOPTIONS="-l 127.0.0.1"' /etc/sysconfig/memcached
 systemctl --now enable memcached httpd
 
 if [ -d /etc/rabbitmq ]; then
