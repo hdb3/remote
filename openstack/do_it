@@ -12,10 +12,12 @@ set -a # this ensures the variables set in the next step are exported to subsequ
 test -f config || exit 1
 test -f roles || exit 1
 source config
-if [ -n "$http_proxy" ]
+if [ -n "$WWWPROXY" ]
   then
-    grep "proxy=" /etc/yum.conf || sed -i "/^\[main\]/a proxy=$http_proxy" /etc/yum.conf
+    grep "proxy=" /etc/yum.conf || sed -i "/^\[main\]/a proxy=$WWWPROXY" /etc/yum.conf
 fi
+# fix for disable IPv6 DNS in yum
+grep "ip_resolve" /etc/yum.conf || sed -i "/^\[main\]/a ip_resolve=4" /etc/yum.conf
 if [ -n "$LOCALREPO" ]
   then
     sudo rm -rf /etc/yum.repos.d/*

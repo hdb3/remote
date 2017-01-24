@@ -50,7 +50,7 @@ if [ -f cirros-0.3.4-x86_64-disk.img ]
 then
   echo "no need to download cirros again"
 else
-  wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+  $http_proxy=$WWWPROXY wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 fi
 # it can take a short while before glance service is available....
 until openstack image list
