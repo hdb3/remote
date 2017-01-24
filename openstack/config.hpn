@@ -8,7 +8,10 @@ DBPASSWD=root
 TUNNEL_SUBNET=192.168.192.0/24
 EXTERNAL_PORT=p1p2
 #VLAN_PORT=p3p2
-OS_VOL_GROUP=cl
+# this is for hpn7 only
+OS_VOL_GROUP=cl_hpn-toucan-007
+# this is for other hosts than hpn7
+#OS_VOL_GROUP=cl
 # kvm is the preferred choice but in some cases it may not be available in your hypervisor hosts.....
 #VIRTMODE=qemu
 VIRTMODE=kvm
@@ -24,3 +27,4 @@ LOCALREPO=TRUE
 OSRELEASE=mitaka
 #INTNET=10.30.64.0/24 INTNAME=net64 INTGW=10.30.65.12
 #DNS=10.30.65.200 GW=10.30.65.1 NET=10.30.65.0/24
+WWWPROXY=http://10.30.65.200:3128
