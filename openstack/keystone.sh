@@ -18,8 +18,13 @@ systemctl restart httpd memcached
 export OS_TOKEN=$ADMIN_TOKEN
 export OS_URL=http://$CONTROLLER_IP:35357/v3
 export OS_IDENTITY_API_VERSION=3
-
-openstack service create --name keystone --description "OpenStack Identity" identity
+# check for openstack identity service avialabolity before continuing.....
+# problems with memcached and apached should manifest here
+until openstack service create --name keystone --description "OpenStack Identity" identity
+do
+  read -t 20 -p "retrying openstack service create..." || echo "."
+done
+#openstack service create --name keystone --description "OpenStack Identity" identity
 openstack domain create --description "Default Domain" default
 openstack project create --domain default --description "Admin Project" admin
 openstack user create --domain default --password $ADMIN_PWD admin
