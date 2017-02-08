@@ -13,6 +13,7 @@ if [[ $TUNNEL_IP == "ERROR" ]] ; then TUNNEL_IP=$MY_IP ; fi
 
 crudini --set --verbose /etc/neutron/neutron.conf database connection mysql+pymysql://neutron:$DBPASSWD@$CONTROLLER_IP/neutron
 
+crudini --set --verbose  /etc/neutron/neutron.conf DEFAULT api_workers 1
 crudini --set --verbose  /etc/neutron/neutron.conf DEFAULT rpc_backend rabbit
 crudini --set --verbose  /etc/neutron/neutron.conf DEFAULT auth_strategy keystone
 crudini --set --verbose  /etc/neutron/neutron.conf DEFAULT core_plugin ml2
@@ -51,6 +52,7 @@ crudini --set --verbose  /etc/neutron/neutron.conf keystone_authtoken password $
 
   crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT nova_metadata_ip $CONTROLLER_IP
   crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT metadata_proxy_shared_secret $META_PWD
+  crudini --set --verbose /etc/neutron/metadata_agent.ini DEFAULT metadata_workers 1
   ln -fs /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugin.ini
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan,gre,vxlan
   crudini --set --verbose  /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types gre

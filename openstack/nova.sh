@@ -7,6 +7,10 @@ if [[ $MY_ROLE =~ "controller" ||  $MY_ROLE =~ "compute" ]] ; then
   crudini --set --verbose /etc/nova/nova.conf DEFAULT enabled_apis osapi_compute,metadata
   crudini --set --verbose /etc/nova/nova.conf api_database connection mysql+pymysql://nova:$DBPASSWD@$CONTROLLER_IP/nova_api
   crudini --set --verbose /etc/nova/nova.conf database connection mysql+pymysql://nova:$DBPASSWD@$CONTROLLER_IP/nova
+  crudini --set --verbose /etc/nova/nova.conf DEFAULT osapi_compute_workers 1
+  crudini --set --verbose /etc/nova/nova.conf DEFAULT metadata_workers 1
+  crudini --set --verbose /etc/nova/nova.conf conductor workers 1
+
 
   crudini --set --verbose /etc/nova/nova.conf DEFAULT use_neutron True
   crudini --set --verbose /etc/nova/nova.conf DEFAULT rpc_backend rabbit
