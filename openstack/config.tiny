@@ -6,7 +6,7 @@ ADMIN_PWD=admin
 META_PWD=meta
 DBPASSWD=root
 #TUNNEL_SUBNET=192.168.0.0/24
-EXTERNAL_PORT=p3p1
+EXTERNAL_PORT=em4
 #VLAN_PORT=p3p2
 OS_VOL_GROUP=centos_tiny
 # kvm is the preferred choice but in some cases it may not be available in your hypervisor hosts.....
@@ -23,4 +23,5 @@ LOCALREPO=TRUE
 #CALICO=TRUE
 OSRELEASE=mitaka
 INTNET=10.30.67.0/24 INTNAME=net67 INTGW=10.30.65.11
+POOLSTART=10.30.65.150 POOLEND=10.30.65.159 FLOATNAME=default FLOATNET=172.16.0.0/24
 DNS=10.30.65.200 GW=10.30.65.1 NET=10.30.65.0/24
