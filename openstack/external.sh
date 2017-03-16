@@ -19,7 +19,7 @@ if [[ -n "$DNS" && -n "$NET" && -n "$GW" && -n "$EXTERNAL_PORT" ]] ; then
    if [[ -n "$INTNAME" && -n "$INTNET" && -n "$EXTERNAL_PORT" ]] ; then
       echo "Building a routed internal network"
    neutron net-create $INTNAME
-   neutron subnet-create --name $INTNAME $INTNAME $INTNET
+   neutron subnet-create --name $INTNAME --dns-nameserver $DNS $INTNAME $INTNET
    neutron router-create router-${INTNAME}
    neutron router-interface-add router-${INTNAME} ${INTNAME}
    neutron router-gateway-set --disable-snat --fixed-ip ip_address=$INTGW router-${INTNAME} $EXTERNAL_PORT
@@ -31,7 +31,7 @@ if [[ -n "$DNS" && -n "$NET" && -n "$GW" && -n "$EXTERNAL_PORT" ]] ; then
    if [[ -n "$FLOATNAME" && -n "$FLOATNET" && -n "$EXTERNAL_PORT" ]] ; then
       echo "Building a default internal network"
        neutron net-create $FLOATNAME
-       neutron subnet-create --name $FLOATNAME $FLOATNAME $FLOATNET
+       neutron subnet-create --name $FLOATNAME --dns-nameserver $DNS $FLOATNAME $FLOATNET
        neutron router-create router-${FLOATNAME}
        neutron router-interface-add router-${FLOATNAME} ${FLOATNAME}
        neutron router-gateway-set router-${FLOATNAME} $EXTERNAL_PORT
